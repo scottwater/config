@@ -8,6 +8,7 @@ export EDITOR=code
 
 
 # Aliases
+alias bb="brew bundle"
 alias la="ls -A -l -G"
 alias pl="cd ~/play"
 alias wo="cd ~/work"
