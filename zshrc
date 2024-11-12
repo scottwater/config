@@ -1,5 +1,6 @@
 eval "$(atuin init zsh)"
 eval "$(starship init zsh)"
+eval "$(mise activate zsh)"
 
 export EDITOR=code
 

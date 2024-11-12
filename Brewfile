@@ -13,6 +13,7 @@ brew "git"
 brew "git-delta"
 brew "heroku"
 brew "starship"
+brew "mise"
 
 brew "atuin"
 cask "font-monaspace-nerd-font"
