@@ -2,7 +2,7 @@ require 'pathname'
 home_path = Dir.home
 script_dir = File.dirname(File.expand_path(__FILE__))
 
-dots = %w[gitconfig gitignore_global zshrc zprofile]
+dots = %w[gitconfig gitignore_global zshrc zprofile gemrc]
 puts "Installing dotfiles: #{dots.join(', ')}"
 
 dots.each do |dot|
