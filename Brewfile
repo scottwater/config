@@ -17,6 +17,7 @@ brew "mise"
 brew "redis"
 brew "neovim"
 brew "zsh-syntax-highlighting"
+brew "zsh-autosuggestions"
 
 brew "atuin"
 cask "font-monaspace-nerd-font"
