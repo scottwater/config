@@ -21,7 +21,7 @@ end
 
 puts "\n\n"
 
-config_files = %w[Brewfile]
+config_files = %w[Brewfile zsh]
 puts "Installing config_files: #{config_files.join(', ')}"
 config_files.each do |config|
   symlink = File.join(home_path, config)
