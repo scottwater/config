@@ -15,6 +15,7 @@ brew "heroku"
 brew "starship"
 brew "mise"
 brew "redis"
+brew "neovim"
 
 brew "atuin"
 cask "font-monaspace-nerd-font"
