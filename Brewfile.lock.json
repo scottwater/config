@@ -582,6 +582,45 @@
             }
           }
         }
+      },
+      "libpq": {
+        "version": "17.0_2",
+        "bottle": {
+          "rebuild": 0,
+          "root_url": "https://ghcr.io/v2/homebrew/core",
+          "files": {
+            "arm64_sequoia": {
+              "cellar": "/opt/homebrew/Cellar",
+              "url": "https://ghcr.io/v2/homebrew/core/libpq/blobs/sha256:a7d324023a64b4c30827a296e90b013c6568985e0a2a0ca07267ddbb57ed6b64",
+              "sha256": "a7d324023a64b4c30827a296e90b013c6568985e0a2a0ca07267ddbb57ed6b64"
+            },
+            "arm64_sonoma": {
+              "cellar": "/opt/homebrew/Cellar",
+              "url": "https://ghcr.io/v2/homebrew/core/libpq/blobs/sha256:2bd5ab7f788d564457ca517c3301444b0f000c326cb4e44a253077b2c5d0f8cb",
+              "sha256": "2bd5ab7f788d564457ca517c3301444b0f000c326cb4e44a253077b2c5d0f8cb"
+            },
+            "arm64_ventura": {
+              "cellar": "/opt/homebrew/Cellar",
+              "url": "https://ghcr.io/v2/homebrew/core/libpq/blobs/sha256:2ddaa7ed1c71d98592877c034df221bd3d9fdfcb4b4fe1aee1f36a751693891a",
+              "sha256": "2ddaa7ed1c71d98592877c034df221bd3d9fdfcb4b4fe1aee1f36a751693891a"
+            },
+            "sonoma": {
+              "cellar": "/usr/local/Cellar",
+              "url": "https://ghcr.io/v2/homebrew/core/libpq/blobs/sha256:6df62d3e1f4ed6e379acf636a7e2516fb06af0c07da39daa1cb669b125f56794",
+              "sha256": "6df62d3e1f4ed6e379acf636a7e2516fb06af0c07da39daa1cb669b125f56794"
+            },
+            "ventura": {
+              "cellar": "/usr/local/Cellar",
+              "url": "https://ghcr.io/v2/homebrew/core/libpq/blobs/sha256:da2f9440626b64ff20efa7844b0941b661b4cd15a8e9ce0be8e5fc14ae44a544",
+              "sha256": "da2f9440626b64ff20efa7844b0941b661b4cd15a8e9ce0be8e5fc14ae44a544"
+            },
+            "x86_64_linux": {
+              "cellar": "/home/linuxbrew/.linuxbrew/Cellar",
+              "url": "https://ghcr.io/v2/homebrew/core/libpq/blobs/sha256:8f8e4ead281acc6b88d933d2ed995211c016cf9050dba494e1103f0eb57d5afa",
+              "sha256": "8f8e4ead281acc6b88d933d2ed995211c016cf9050dba494e1103f0eb57d5afa"
+            }
+          }
+        }
       }
     },
     "cask": {
@@ -616,6 +655,15 @@
         "version": "2.7.8,12-13-14-15-16-17",
         "options": {
           "full_name": "postgres-unofficial",
+          "args": {
+            "appdir": "/Applications"
+          }
+        }
+      },
+      "alt-tab": {
+        "version": "7.3.0",
+        "options": {
+          "full_name": "alt-tab",
           "args": {
             "appdir": "/Applications"
           }
