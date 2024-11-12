@@ -2,6 +2,8 @@ eval "$(atuin init zsh)"
 eval "$(starship init zsh)"
 eval "$(mise activate zsh)"
 
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
 export EDITOR=code
 
 

@@ -16,6 +16,7 @@ brew "starship"
 brew "mise"
 brew "redis"
 brew "neovim"
+brew "zsh-syntax-highlighting"
 
 brew "atuin"
 cask "font-monaspace-nerd-font"
