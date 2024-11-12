@@ -1,0 +1,8 @@
+[user]
+  name = Scott Watermasysk
+  email = scottwater@gmail.com
+[core]
+  autocrlf = false
+  legacyheaders = false
+  pager = delta
+  excludesfile = ~/.gitignore_global
