@@ -39,7 +39,7 @@ end
 
 puts "\n\n"
 
-configs = %w[atuin kitty]
+configs = %w[atuin kitty mise]
 puts "Installing configs: #{configs.join(', ')}"
 config_path = File.join(home_path, ".config")
 configs.each do |config|
