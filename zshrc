@@ -5,7 +5,7 @@ eval "$(mise activate zsh)"
 source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
-source zsh/zsh-z.plugin.zsh
+source $HOME/zsh/zsh-z.plugin.zsh
 autoload -U compinit; compinit
 zstyle ':completion:*' menu select
 
