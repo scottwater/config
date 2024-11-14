@@ -31,6 +31,7 @@ alias rs="bin/dev"
 alias be="bundle exec"
 alias g="git"
 alias s="g status -s"
+alias vs="code"
 function hs(){
   heroku  "$@" --remote staging
 }
