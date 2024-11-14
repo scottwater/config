@@ -1,6 +1,7 @@
 cask_args appdir: "/Applications"
 tap "heroku/brew"
 tap "universal-ctags/universal-ctags"
+tap "puma/puma"
 
 brew "bat"
 brew "fzf"
@@ -19,6 +20,8 @@ brew "neovim"
 brew "zsh-syntax-highlighting"
 brew "zsh-autosuggestions"
 brew "libpq"
+brew "overmind"
+brew "puma-dev"
 
 brew "atuin"
 cask "font-monaspace-nerd-font"
