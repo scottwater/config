@@ -22,6 +22,7 @@ brew "zsh-autosuggestions"
 brew "libpq"
 brew "overmind"
 brew "puma-dev"
+brew "lazygit"
 
 brew "atuin"
 cask "font-monaspace-nerd-font"
