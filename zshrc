@@ -32,7 +32,8 @@ alias be="bundle exec"
 alias g="git"
 alias s="g status -s"
 alias vs="code"
-alias dots="vs ~/projects/config"
+alias c="cursor"
+alias dots="cursor ~/projects/config"
 function hs(){
   heroku  "$@" --remote staging
 }
