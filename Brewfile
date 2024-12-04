@@ -1,11 +1,9 @@
 cask_args appdir: "/Applications"
 tap "heroku/brew"
-tap "universal-ctags/universal-ctags"
 tap "puma/puma"
 
 brew "bat"
 brew "fzf"
-brew "universal-ctags", args: ["HEAD"]
 brew "tree"
 brew "wget"
 
