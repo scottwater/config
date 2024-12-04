@@ -8,3 +8,5 @@
 node_modules/
 .mise.toml
 .cursorrules
+.env
+.envrc
