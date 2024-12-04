@@ -55,3 +55,4 @@ searchAndDestroy() {
   echo "Port" $1 "found and killed."
 }
 
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
