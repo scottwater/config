@@ -10,3 +10,4 @@ node_modules/
 .cursorrules
 .env
 .envrc
+.pumaenv
