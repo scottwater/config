@@ -2,6 +2,7 @@ cask_args appdir: "/Applications"
 tap "heroku/brew"
 tap "puma/puma"
 
+
 brew "bat"
 brew "fzf"
 brew "tree"
@@ -29,3 +30,4 @@ cask "kitty"
 cask "jordanbaird-ice"
 cask "postgres-unofficial"
 cask "alt-tab"
+cask "browserosaurus"
