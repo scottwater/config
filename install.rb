@@ -35,6 +35,12 @@ install_links(dotfiles, script_dir, home_path)
 config_files = %w[Brewfile zsh]
 install_links(config_files, script_dir, home_path, prefix: "")
 
+# Starship config file
+starship_source = File.join(script_dir, "config", "starship.toml")
+starship_target = File.join(config_path, "starship.toml")
+link_if_needed(starship_target, starship_source)
+puts "\n"
+
 # Config directory files
 configs = %w[atuin kitty mise nvim]
 install_links(configs, File.join(script_dir, "config"), config_path, prefix: "")
