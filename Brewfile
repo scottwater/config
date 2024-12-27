@@ -23,7 +23,6 @@ brew "overmind"
 brew "puma-dev"
 brew "lazygit"
 brew "gh"
-
 brew "atuin"
 cask "font-monaspace-nerd-font"
 
@@ -32,4 +31,4 @@ cask "jordanbaird-ice"
 cask "postgres-unofficial"
 cask "alt-tab"
 cask "browserosaurus"
-cask "gitbutler"
+cask "ghostty"
