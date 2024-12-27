@@ -46,3 +46,6 @@
 	helper = osxkeychain
 [push]
 	default = matching
+
+[include]
+  path = ~/.gitconfig_custom
