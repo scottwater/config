@@ -9,7 +9,7 @@ source $HOME/zsh/zsh-z.plugin.zsh
 autoload -U compinit; compinit
 zstyle ':completion:*' menu select
 
-export EDITOR=code
+export EDITOR=nvim
 
 
 
@@ -56,3 +56,6 @@ searchAndDestroy() {
 }
 
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+# Added by Windsurf
+export PATH="/Users/Scott.Watermasysk/.codeium/windsurf/bin:$PATH"
