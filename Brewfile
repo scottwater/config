@@ -25,6 +25,7 @@ brew "lazygit"
 brew "gh"
 brew "atuin"
 cask "font-monaspace-nerd-font"
+brew "entr"
 
 cask "kitty"
 cask "jordanbaird-ice"

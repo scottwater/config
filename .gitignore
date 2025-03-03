@@ -1,3 +1,4 @@
 Brewfile.lock.json
 config/nvim/lazy-lock.json
 config/mise/config.toml
+config/nvim/lazyvim.json

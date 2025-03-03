@@ -1,6 +1,6 @@
 [user]
   name = Scott Watermasysk
-  email = scottwater@gmail.com
+	email = scott.watermasysk@kodehealth.com
 [core]
   autocrlf = false
   legacyheaders = false
@@ -41,6 +41,8 @@
 	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit
 	get = !git pull origin $(git rev-parse --abbrev-ref HEAD)
 	set = !git push origin $(git rev-parse --abbrev-ref HEAD)
+  rebase-pr = "!f() { TARGET=${2:-main}; git rebase --onto $TARGET $1; }; f"
+	cr = !git add . && git rebase --continue
 
 [format]
 	pretty=format:%C(yellow)%h%Creset -%C(red)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset
@@ -51,3 +53,8 @@
 
 [include]
   path = ~/.gitconfig_custom
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

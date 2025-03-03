@@ -30,7 +30,6 @@ alias rc="bundle exec rails console"
 alias bd="bin/dev"
 alias be="bundle exec"
 alias br="bin/rails"
-alias t="be rspec"
 alias g="git"
 alias s="g status -s"
 alias vs="code"
@@ -58,7 +57,20 @@ searchAndDestroy() {
   echo "Port" $1 "found and killed."
 }
 
+
+function t() {
+  if [ -d "spec" ]; then
+    bundle exec rspec "$@"
+  elif [ -d "test" ]; then
+    bin/rails test "$@"
+  else
+    echo "No spec or test directory found."
+  fi
+}
+
+
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 # Added by Windsurf
 export PATH="/Users/Scott.Watermasysk/.codeium/windsurf/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
