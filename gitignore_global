@@ -11,5 +11,5 @@ node_modules/
 .env
 .envrc
 .pumaenv
-.cursor
 .projections.json
+__tasks/*
