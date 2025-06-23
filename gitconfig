@@ -41,6 +41,7 @@
 	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit
 	get = !git pull origin $(git rev-parse --abbrev-ref HEAD)
 	set = !git push origin $(git rev-parse --abbrev-ref HEAD)
+	amend = !git commit --amend --no-edit
   rebase-pr = "!f() { TARGET=${2:-main}; git rebase --onto $TARGET $1; }; f"
 	cr = !git add . && git rebase --continue
 
