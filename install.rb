@@ -1,5 +1,9 @@
 require "pathname"
 
+def system!(*args)
+  system(*args, exception: true)
+end
+
 def link_if_needed(symlink, source)
   raise "Source file #{source} does not exist" unless File.exist?(source)
 
@@ -44,3 +48,5 @@ puts "\n"
 # Config directory files
 configs = %w[atuin kitty mise nvim ghostty]
 install_links(configs, File.join(script_dir, "config"), config_path, prefix: "")
+
+system! "brew bundle --no-upgrade"
