@@ -46,8 +46,14 @@ link_if_needed(starship_target, starship_source)
 puts "\n"
 
 # Config directory files
-configs = %w[atuin kitty nvim ghostty]
+configs = %w[atuin kitty nvim ghostty mise]
 install_links(configs, File.join(script_dir, "config"), config_path, prefix: "")
+
+# Install mise if not already installed
+unless system("which mise > /dev/null 2>&1")
+  puts "Installing mise..."
+  system! 'curl https://mise.run | sh'
+end
 
 # Install Homebrew if not already installed
 unless system("which brew > /dev/null 2>&1")
