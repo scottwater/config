@@ -74,7 +74,3 @@ source $HOME/zsh/test-helpers.zsh
 alias aic="tg && popo"
 
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-
-# Added by Windsurf
-export PATH="/Users/Scott.Watermasysk/.codeium/windsurf/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
