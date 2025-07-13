@@ -46,7 +46,7 @@ link_if_needed(starship_target, starship_source)
 puts "\n"
 
 # Config directory files
-configs = %w[atuin kitty nvim ghostty mise]
+configs = %w[atuin kitty nvim ghostty]
 install_links(configs, File.join(script_dir, "config"), config_path, prefix: "")
 
 # Install mise if not already installed
