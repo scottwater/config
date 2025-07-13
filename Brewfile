@@ -24,6 +24,7 @@ brew "puma-dev"
 brew "lazygit"
 brew "gh"
 brew "atuin"
+brew "puma-dev"
 cask "font-monaspace-nerd-font"
 brew "entr"
 
