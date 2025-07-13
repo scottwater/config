@@ -49,4 +49,10 @@ puts "\n"
 configs = %w[atuin kitty nvim ghostty]
 install_links(configs, File.join(script_dir, "config"), config_path, prefix: "")
 
+# Install Homebrew if not already installed
+unless system("which brew > /dev/null 2>&1")
+  puts "Installing Homebrew..."
+  system! '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+end
+
 system! "brew bundle --no-upgrade"
