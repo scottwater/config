@@ -61,4 +61,7 @@ unless system("which brew > /dev/null 2>&1")
   system! '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
 end
 
+# reload shell before continuing (brew command will not exist without)
+system! "exec zsh -l"
+
 system! "brew bundle --no-upgrade"
