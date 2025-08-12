@@ -27,6 +27,7 @@ brew "atuin"
 brew "puma-dev"
 cask "font-monaspace-nerd-font"
 brew "entr"
+brew "libyaml" # For Ruby 3.x
 
 cask "kitty"
 cask "jordanbaird-ice"
@@ -35,3 +36,4 @@ cask "alt-tab"
 cask "ghostty"
 cask "cursor"
 cask "visual-studio-code"
+cask "google-chrome"
