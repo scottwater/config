@@ -61,7 +61,7 @@ _resolve_test_args() {
   local profile_args=()
   local final_args=()
   local use_profile=true
-  local specified_profile=""
+  local specified_profiles=()
   local show_help=false
   local i=1
 
@@ -73,7 +73,14 @@ _resolve_test_args() {
     case "${user_args[$i]}" in
       --profile)
         if [[ $i -lt ${#user_args[@]} ]]; then
-          specified_profile="${user_args[$i+1]}"
+          local profile_list="${user_args[$i+1]}"
+          # Handle comma-separated profiles
+          if [[ "$profile_list" == *","* ]]; then
+            IFS=',' read -A profile_array <<< "$profile_list"
+            specified_profiles+=("${profile_array[@]}")
+          else
+            specified_profiles+=("$profile_list")
+          fi
           i=$((i + 1))  # Skip the next argument as it's the profile name
         else
           echo "Error: --profile requires a profile name" >&2
@@ -81,7 +88,14 @@ _resolve_test_args() {
         fi
         ;;
       --profile=*)
-        specified_profile="${user_args[$i]#*=}"
+        local profile_list="${user_args[$i]#*=}"
+        # Handle comma-separated profiles
+        if [[ "$profile_list" == *","* ]]; then
+          IFS=',' read -A profile_array <<< "$profile_list"
+          specified_profiles+=("${profile_array[@]}")
+        else
+          specified_profiles+=("$profile_list")
+        fi
         ;;
       --no-profile)
         use_profile=false
@@ -102,21 +116,36 @@ _resolve_test_args() {
     return 42  # Special return code to indicate help was shown
   fi
 
-  # Determine which profile to use
+  # Determine which profiles to use
   if [[ $use_profile == true ]]; then
-    local target_profile="${specified_profile:-default}"
+    local profiles_to_use=()
 
-    if [[ -n "${_TEST_CONFIG[$target_profile]:-}" ]]; then
-      # Split profile args safely without eval to avoid ~ expansion issues
-      local profile_arg_string="${_TEST_CONFIG[$target_profile]}"
-      profile_args=(${=profile_arg_string})
-    elif [[ -n "$specified_profile" ]]; then
-      echo "Error: Profile '$specified_profile' not found in .t file" >&2
-      if [[ ${#_TEST_CONFIG[@]} -gt 0 ]]; then
-        echo "Available profiles: ${(k)_TEST_CONFIG[*]}" >&2
-      fi
-      return 1
+    # If no profiles specified, use default
+    if [[ ${#specified_profiles[@]} -eq 0 ]]; then
+      profiles_to_use=("default")
+    else
+      profiles_to_use=("${specified_profiles[@]}")
     fi
+
+    # Process each profile and collect arguments
+    for target_profile in "${profiles_to_use[@]}"; do
+      # Skip empty profile names
+      [[ -z "$target_profile" ]] && continue
+
+      if [[ -n "${_TEST_CONFIG[$target_profile]:-}" ]]; then
+        # Split profile args safely without eval to avoid ~ expansion issues
+        local profile_arg_string="${_TEST_CONFIG[$target_profile]}"
+        local single_profile_args=(${=profile_arg_string})
+        profile_args+=("${single_profile_args[@]}")
+      elif [[ "$target_profile" != "default" || ${#specified_profiles[@]} -gt 0 ]]; then
+        # Only show error if it's not the default profile or if profiles were explicitly specified
+        echo "Error: Profile '$target_profile' not found in .t file" >&2
+        if [[ ${#_TEST_CONFIG[@]} -gt 0 ]]; then
+          echo "Available profiles: ${(k)_TEST_CONFIG[*]}" >&2
+        fi
+        return 1
+      fi
+    done
   fi
 
   # Combine profile args with user args (profile args first, so user args can override)
@@ -136,6 +165,8 @@ _show_profile_help() {
     echo "Usage:"
     echo "  t                      # Use 'default' profile if available"
     echo "  t --profile <name>     # Use specific profile"
+    echo "  t --profile <n1,n2>    # Use multiple profiles (comma-separated)"
+    echo "  t --profile <n1> --profile <n2>  # Use multiple profiles (multiple flags)"
     echo "  t --no-profile         # Don't use any profile"
     echo ""
   else
@@ -252,6 +283,8 @@ _run_tests() {
 # Examples:
 #   t                           # Run all tests (with default profile if .t exists)
 #   t --profile slow            # Run with 'slow' profile from .t file
+#   t --profile slow,doc        # Run with multiple profiles (comma-separated)
+#   t --profile slow --profile doc  # Run with multiple profiles (multiple flags)
 #   t --no-profile              # Run without any profile
 #   t --format documentation    # Run with specific RSpec format
 #   t --verbose                 # Run Rails tests with verbose output
@@ -331,6 +364,8 @@ function tgf() {
 # Examples:
 #   tff                         # Run with fail-fast and random seed (with default profile if .t exists)
 #   tff --profile slow          # Run with 'slow' profile from .t file
+#   tff --profile slow,doc      # Run with multiple profiles (comma-separated)
+#   tff --profile slow --profile doc  # Run with multiple profiles (multiple flags)
 #   tff --no-profile            # Run without any profile
 #   tff --seed=12345           # Run with specific seed
 #   echo $SEED                 # Check persisted seed after failure
