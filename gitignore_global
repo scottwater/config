@@ -13,3 +13,9 @@ node_modules/
 .pumaenv
 .projections.json
 __tasks/*
+CLAUDE.md
+.kiro/*
+.github/copilot-instructions.md
+.claude/*
+.t
+.specstory/*
