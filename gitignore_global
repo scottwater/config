@@ -15,3 +15,4 @@ node_modules/
 __tasks/*
 .t
 .claude/settings.local.json
+CLAUDE.local.md
