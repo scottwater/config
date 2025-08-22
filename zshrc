@@ -71,6 +71,9 @@ searchAndDestroy() {
 # Load test helpers
 source $HOME/zsh/test-helpers.zsh
 
+# Load ruby helpers
+source $HOME/zsh/ruby-helpers.zsh
+
 alias aic="tg && popo"
 
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
