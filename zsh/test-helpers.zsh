@@ -104,7 +104,19 @@ _resolve_test_args() {
         show_help=true
         ;;
       *)
-        final_args+=("${user_args[$i]}")
+        # Check if this flag matches a profile name (e.g., --fast, --slow)
+        if [[ "${user_args[$i]}" == --* ]]; then
+          local potential_profile="${user_args[$i]#--}"
+          if [[ -n "${_TEST_CONFIG[$potential_profile]:-}" ]]; then
+            # This is a profile shortcut
+            specified_profiles+=("$potential_profile")
+          else
+            # Regular flag, pass it through
+            final_args+=("${user_args[$i]}")
+          fi
+        else
+          final_args+=("${user_args[$i]}")
+        fi
         ;;
     esac
     i=$((i + 1))
@@ -133,9 +145,17 @@ _resolve_test_args() {
       [[ -z "$target_profile" ]] && continue
 
       if [[ -n "${_TEST_CONFIG[$target_profile]:-}" ]]; then
+        # Resolve profile (handles references like --fast)
+        local resolved_profile_args
+        resolved_profile_args=$(_resolve_profile_reference "$target_profile")
+        local resolve_status=$?
+        
+        if [[ $resolve_status -ne 0 ]]; then
+          return $resolve_status
+        fi
+        
         # Split profile args safely without eval to avoid ~ expansion issues
-        local profile_arg_string="${_TEST_CONFIG[$target_profile]}"
-        local single_profile_args=(${=profile_arg_string})
+        local single_profile_args=(${=resolved_profile_args})
         profile_args+=("${single_profile_args[@]}")
       elif [[ "$target_profile" != "default" || ${#specified_profiles[@]} -gt 0 ]]; then
         # Only show error if it's not the default profile or if profiles were explicitly specified
@@ -152,6 +172,38 @@ _resolve_test_args() {
   echo "${profile_args[@]} ${final_args[@]}"
 }
 
+# Resolves profile references recursively (when profile value starts with --)
+# Args: $1 - profile name to resolve
+# Returns: the final profile arguments, or error if circular reference detected
+_resolve_profile_reference() {
+  local profile_name="$1"
+  local visited_profiles=("${@:2}")  # Get all previously visited profiles
+  local profile_value="${_TEST_CONFIG[$profile_name]:-}"
+  
+  # Check if profile exists
+  if [[ -z "$profile_value" ]]; then
+    return 1
+  fi
+  
+  # Check for circular reference
+  for visited in "${visited_profiles[@]}"; do
+    if [[ "$visited" == "$profile_name" ]]; then
+      echo "Error: Circular profile reference detected: ${visited_profiles[*]} -> $profile_name" >&2
+      return 1
+    fi
+  done
+  
+  # Check if this profile references another profile (starts with --)
+  if [[ "$profile_value" =~ ^--([a-zA-Z0-9_-]+)$ ]]; then
+    local referenced_profile="${profile_value#--}"
+    # Recursively resolve the referenced profile
+    _resolve_profile_reference "$referenced_profile" "${visited_profiles[@]}" "$profile_name"
+  else
+    # This is a regular profile, return its args
+    echo "$profile_value"
+  fi
+}
+
 # Shows help information including available profiles from .t file
 _show_profile_help() {
   echo ""
@@ -164,6 +216,7 @@ _show_profile_help() {
     echo ""
     echo "Usage:"
     echo "  t                      # Use 'default' profile if available"
+    echo "  t --<profile>          # Use profile shortcut (e.g., --fast, --slow)"
     echo "  t --profile <name>     # Use specific profile"
     echo "  t --profile <n1,n2>    # Use multiple profiles (comma-separated)"
     echo "  t --profile <n1> --profile <n2>  # Use multiple profiles (multiple flags)"
@@ -241,6 +294,51 @@ _handle_test_seed() {
   echo "${args[@]}"
 }
 
+# Generates a default .t configuration file with fast and slow profiles
+# Based on the detected test framework (RSpec or Rails)
+_generate_test_config() {
+  # Check if .t file already exists
+  if [[ -f ".t" ]]; then
+    echo "Error: .t file already exists. Delete it first if you want to generate a new one." >&2
+    return 1
+  fi
+
+  local framework=$(_detect_test_framework)
+  
+  if [[ "$framework" == "none" ]]; then
+    echo "Error: No test framework detected (no spec/ or test/ directory found)." >&2
+    return 1
+  fi
+
+  echo "Generating .t configuration file for $framework framework..."
+
+  case $framework in
+    "rspec")
+      cat > .t << 'EOF'
+# Test configuration profiles
+# Usage: t --profile <profile_name>
+
+default: --fast
+fast: --tag ~type:system --tag ~speed:slow
+slow: --tag type:system --tag speed:slow
+EOF
+      ;;
+    "rails")
+      cat > .t << 'EOF'
+# Test configuration profiles  
+# Usage: t --profile <profile_name>
+
+default: --fast
+fast: test/models test/controllers test/helpers test/mailers test/jobs
+slow: test/system
+EOF
+      ;;
+  esac
+
+  echo ".t file generated successfully!"
+  echo "You can customize the profiles by editing the .t file."
+}
+
 # Executes tests using the appropriate command for the detected framework
 # Args: $1 - framework ("rspec" or "rails")
 #       $2 - space/newline-separated list of test files (empty string for all tests)
@@ -282,6 +380,9 @@ _run_tests() {
 # Usage: t [options]
 # Examples:
 #   t                           # Run all tests (with default profile if .t exists)
+#   t --generate                # Generate a .t configuration file with fast/slow profiles
+#   t --fast                    # Run with 'fast' profile (shortcut for --profile fast)
+#   t --slow                    # Run with 'slow' profile (shortcut for --profile slow)
 #   t --profile slow            # Run with 'slow' profile from .t file
 #   t --profile slow,doc        # Run with multiple profiles (comma-separated)
 #   t --profile slow --profile doc  # Run with multiple profiles (multiple flags)
@@ -289,6 +390,14 @@ _run_tests() {
 #   t --format documentation    # Run with specific RSpec format
 #   t --verbose                 # Run Rails tests with verbose output
 function t() {
+  # Check for --generate flag first
+  for arg in "$@"; do
+    if [[ "$arg" == "--generate" ]]; then
+      _generate_test_config
+      return $?
+    fi
+  done
+
   local framework=$(_detect_test_framework)
   local resolved_args
 
