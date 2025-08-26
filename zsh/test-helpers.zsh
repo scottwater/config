@@ -541,19 +541,103 @@ function tg() {
 }
 
 # Run all tests, but only show failures (skip passing tests in output)
+# Does NOT use test profiles - runs tests directly with arguments
 # Usage: tf [options]
 # Examples:
 #   tf                          # Run all tests, only show failures
+#   tf spec/models              # Run tests in spec/models, only show failures
 function tf() {
-  t --only-failures "$@"
+  local framework=$(_detect_test_framework)
+
+  if [ "$framework" = "none" ]; then
+    echo "No spec or test directory found."
+    return 1
+  fi
+
+  # Run tests directly without profile resolution
+  _run_tests "$framework" "" --only-failures "$@"
 }
 
 # Run git-modified tests, but only show failures
+# Does NOT use test profiles - runs tests directly with arguments
 # Usage: tgf [options]
 # Examples:
 #   tgf                         # Run modified tests, only show failures
 function tgf() {
-  tg --only-failures "$@"
+  local framework=$(_detect_test_framework)
+
+  if [ "$framework" = "none" ]; then
+    echo "No spec or test directory found."
+    return 1
+  fi
+
+  local pattern
+  if [ "$framework" = "rspec" ]; then
+    pattern="_spec\.rb$"
+  else
+    pattern="_test\.rb$"
+  fi
+
+  # Get modified test files
+  local test_files=$(_get_git_modified_files "$pattern")
+
+  # Get ALL modified files to find related specs
+  local all_modified_files=$(git diff --name-only 2>/dev/null)
+  all_modified_files="$all_modified_files"$'\n'$(git diff --cached --name-only 2>/dev/null)
+  all_modified_files="$all_modified_files"$'\n'$(git ls-files --others --exclude-standard 2>/dev/null)
+
+  # Find related spec files for non-test files
+  local related_specs=""
+  local debug_mode="${TG_DEBUG:-}"
+
+  while IFS= read -r file; do
+    if [[ -n "$file" ]]; then
+      if [[ -n "$debug_mode" ]]; then
+        echo "DEBUG: Checking file: $file" >&2
+      fi
+      local spec_file=$(_find_related_spec "$file")
+      if [[ -n "$spec_file" ]]; then
+        if [[ -n "$debug_mode" ]]; then
+          echo "DEBUG: Found spec: $spec_file" >&2
+        fi
+        related_specs="$related_specs"$'\n'"$spec_file"
+      elif [[ -n "$debug_mode" ]] && [[ "$file" =~ \.rb$ ]] && [[ ! "$file" =~ _spec\.rb$ ]]; then
+        # Debug: show what spec file we looked for but didn't find
+        local expected_spec=""
+        if [[ "$file" == app/* ]]; then
+          expected_spec="spec/${file#app/}"
+          expected_spec="${expected_spec%.rb}_spec.rb"
+          echo "DEBUG: No spec found at: $expected_spec" >&2
+        fi
+      fi
+    fi
+  done <<< "$all_modified_files"
+
+  # Combine test files and related specs, remove duplicates and empty lines
+  local all_test_files=""
+  if [[ -n "$test_files" ]]; then
+    all_test_files="$test_files"
+  fi
+  if [[ -n "$related_specs" ]]; then
+    if [[ -n "$all_test_files" ]]; then
+      all_test_files="$all_test_files"$'\n'"$related_specs"
+    else
+      all_test_files="$related_specs"
+    fi
+  fi
+
+  # Remove duplicates and empty lines
+  all_test_files=$(echo "$all_test_files" | sort -u | grep -v '^$')
+
+  if [ -n "$all_test_files" ]; then
+    echo "Running tests on modified files and their related specs (failures only):"
+    echo "$all_test_files" | sed 's/^/  /'
+    echo ""
+    # Run tests directly without profile resolution
+    _run_tests "$framework" "$all_test_files" --only-failures "$@"
+  else
+    echo "No modified test files or related specs found."
+  fi
 }
 
 # Run all tests with fail-fast and automatic seed management
