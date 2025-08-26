@@ -149,11 +149,11 @@ _resolve_test_args() {
         local resolved_profile_args
         resolved_profile_args=$(_resolve_profile_reference "$target_profile")
         local resolve_status=$?
-        
+
         if [[ $resolve_status -ne 0 ]]; then
           return $resolve_status
         fi
-        
+
         # Split profile args safely without eval to avoid ~ expansion issues
         local single_profile_args=(${=resolved_profile_args})
         profile_args+=("${single_profile_args[@]}")
@@ -179,12 +179,12 @@ _resolve_profile_reference() {
   local profile_name="$1"
   local visited_profiles=("${@:2}")  # Get all previously visited profiles
   local profile_value="${_TEST_CONFIG[$profile_name]:-}"
-  
+
   # Check if profile exists
   if [[ -z "$profile_value" ]]; then
     return 1
   fi
-  
+
   # Check for circular reference
   for visited in "${visited_profiles[@]}"; do
     if [[ "$visited" == "$profile_name" ]]; then
@@ -192,7 +192,7 @@ _resolve_profile_reference() {
       return 1
     fi
   done
-  
+
   # Check if this profile references another profile (starts with --)
   if [[ "$profile_value" =~ ^--([a-zA-Z0-9_-]+)$ ]]; then
     local referenced_profile="${profile_value#--}"
@@ -304,7 +304,7 @@ _generate_test_config() {
   fi
 
   local framework=$(_detect_test_framework)
-  
+
   if [[ "$framework" == "none" ]]; then
     echo "Error: No test framework detected (no spec/ or test/ directory found)." >&2
     return 1
@@ -325,7 +325,7 @@ EOF
       ;;
     "rails")
       cat > .t << 'EOF'
-# Test configuration profiles  
+# Test configuration profiles
 # Usage: t --profile <profile_name>
 
 default: --fast
@@ -416,8 +416,50 @@ function t() {
   _run_tests "$framework" "" "${args[@]}"
 }
 
+# Find the corresponding spec file for a given source file
+# Converts paths like app/models/user.rb to spec/models/user_spec.rb
+# Args: $1 - source file path
+# Returns: spec file path if it exists, empty string otherwise
+_find_related_spec() {
+  local source_file="$1"
+  local spec_file=""
+
+  # Skip if already a spec or test file
+  if [[ "$source_file" =~ _spec\.rb$ ]] || [[ "$source_file" =~ _test\.rb$ ]]; then
+    return
+  fi
+
+  # Only process Ruby files
+  if [[ ! "$source_file" =~ \.rb$ ]]; then
+    return
+  fi
+
+  # Convert source path to spec path using string manipulation
+  local base_name="${source_file%.rb}"  # Remove .rb extension
+
+  # Handle app/ prefix
+  if [[ "$source_file" == app/* ]]; then
+    # Remove 'app/' prefix and add to spec/
+    local path_without_app="${base_name#app/}"
+    spec_file="spec/${path_without_app}_spec.rb"
+  # Handle lib/ prefix
+  elif [[ "$source_file" == lib/* ]]; then
+    # Keep lib/ in the spec path
+    spec_file="spec/${base_name}_spec.rb"
+  else
+    # For other files, try direct mapping to spec/
+    spec_file="spec/${base_name}_spec.rb"
+  fi
+
+  # Check if the spec file exists
+  if [[ -f "$spec_file" ]]; then
+    echo "$spec_file"
+  fi
+}
+
 # Run tests only on git-modified files (changed, staged, or untracked)
 # Automatically detects _spec.rb files for RSpec or _test.rb files for Rails tests
+# Also finds and includes related spec files for modified source files
 # Usage: tg [options]
 # Examples:
 #   tg                          # Run tests on all modified test files
@@ -437,15 +479,64 @@ function tg() {
     pattern="_test\.rb$"
   fi
 
+  # Get modified test files
   local test_files=$(_get_git_modified_files "$pattern")
 
-  if [ -n "$test_files" ]; then
-    echo "Running tests on modified files:"
-    echo "$test_files" | sed 's/^/  /'
+  # Get ALL modified files to find related specs
+  local all_modified_files=$(git diff --name-only 2>/dev/null)
+  all_modified_files="$all_modified_files"$'\n'$(git diff --cached --name-only 2>/dev/null)
+  all_modified_files="$all_modified_files"$'\n'$(git ls-files --others --exclude-standard 2>/dev/null)
+
+  # Find related spec files for non-test files
+  local related_specs=""
+  local debug_mode="${TG_DEBUG:-}"
+
+  while IFS= read -r file; do
+    if [[ -n "$file" ]]; then
+      if [[ -n "$debug_mode" ]]; then
+        echo "DEBUG: Checking file: $file" >&2
+      fi
+      local spec_file=$(_find_related_spec "$file")
+      if [[ -n "$spec_file" ]]; then
+        if [[ -n "$debug_mode" ]]; then
+          echo "DEBUG: Found spec: $spec_file" >&2
+        fi
+        related_specs="$related_specs"$'\n'"$spec_file"
+      elif [[ -n "$debug_mode" ]] && [[ "$file" =~ \.rb$ ]] && [[ ! "$file" =~ _spec\.rb$ ]]; then
+        # Debug: show what spec file we looked for but didn't find
+        local expected_spec=""
+        if [[ "$file" == app/* ]]; then
+          expected_spec="spec/${file#app/}"
+          expected_spec="${expected_spec%.rb}_spec.rb"
+          echo "DEBUG: No spec found at: $expected_spec" >&2
+        fi
+      fi
+    fi
+  done <<< "$all_modified_files"
+
+  # Combine test files and related specs, remove duplicates and empty lines
+  local all_test_files=""
+  if [[ -n "$test_files" ]]; then
+    all_test_files="$test_files"
+  fi
+  if [[ -n "$related_specs" ]]; then
+    if [[ -n "$all_test_files" ]]; then
+      all_test_files="$all_test_files"$'\n'"$related_specs"
+    else
+      all_test_files="$related_specs"
+    fi
+  fi
+
+  # Remove duplicates and empty lines
+  all_test_files=$(echo "$all_test_files" | sort -u | grep -v '^$')
+
+  if [ -n "$all_test_files" ]; then
+    echo "Running tests on modified files and their related specs:"
+    echo "$all_test_files" | sed 's/^/  /'
     echo ""
-    _run_tests "$framework" "$test_files" "$@"
+    _run_tests "$framework" "$all_test_files" "$@"
   else
-    echo "No modified test files found."
+    echo "No modified test files or related specs found."
   fi
 }
 
