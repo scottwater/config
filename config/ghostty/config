@@ -1,5 +1,5 @@
 font-family = "MonaspiceRn Nerd Font Mono"
 font-size = 18
 
-theme = "light:tokyonight-day,dark:tokyonight"
+theme = "light:tokyonight day,dark:tokyonight night"
 keybind = shift+enter=text:\n
