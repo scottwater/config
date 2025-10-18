@@ -1,4 +1,5 @@
 require "pathname"
+require "fileutils"
 
 def system!(*args)
   system(*args, exception: true)
