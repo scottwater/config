@@ -1,0 +1,44 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "git_panel": {
+    "scrollbar": {
+      "show": "never"
+    }
+  },
+  "scrollbar": {
+    "show": "never"
+  },
+  "icon_theme": "Monospace Icon Theme - Light",
+  "project_panel": {
+    "hide_root": true,
+    "entry_spacing": "standard",
+    "dock": "left",
+    "folder_icons": false,
+    "auto_fold_dirs": true,
+    "auto_reveal_entries": true,
+    "scrollbar": {
+      "show": "never"
+    }
+  },
+  "ui_font_size": 16,
+  "ui_font_family": "MonaspiceAr Nerd Font Mono",
+  "buffer_font_family": "MonaspiceRn Nerd Font Mono",
+  "buffer_font_size": 20,
+  "theme": {
+    "mode": "system",
+    "light": "Tokyo Night Storm",
+    "dark": "Tokyo Night"
+  },
+  "languages": {
+    "Ruby": {
+      "language_servers": ["ruby-lsp"]
+    }
+  }
+}

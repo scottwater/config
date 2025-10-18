@@ -8,9 +8,14 @@ def link_if_needed(symlink, source)
   raise "Source file #{source} does not exist" unless File.exist?(source)
 
   if File.symlink?(symlink)
-    puts "#{symlink} is already a symlink"
+    current_target = File.readlink(symlink)
+    if File.expand_path(current_target) == File.expand_path(source)
+      puts "#{symlink} is already correctly symlinked, skipping"
+    else
+      puts "#{symlink} is symlinked to #{current_target} (expected: #{source})"
+    end
   elsif File.exist?(symlink)
-    puts "#{symlink} already exists, skipping"
+    puts "#{symlink} already exists and is not a symlink, skipping"
   else
     puts "Creating symlink for #{source}"
     system("ln -s #{source} #{symlink}")
@@ -48,6 +53,30 @@ puts "\n"
 # Config directory files
 configs = %w[atuin kitty nvim ghostty]
 install_links(configs, File.join(script_dir, "config"), config_path, prefix: "")
+
+# Zed config files - symlink individual files
+zed_config_dir = File.join(config_path, "zed")
+zed_source_dir = File.join(script_dir, "config", "zed")
+
+if File.exist?(zed_source_dir)
+  puts "Installing Zed config files"
+
+  # Ensure ~/.config/zed directory exists
+  unless Dir.exist?(zed_config_dir)
+    puts "Creating #{zed_config_dir} directory"
+    FileUtils.mkdir_p(zed_config_dir)
+  end
+
+  # Symlink each file in the zed config directory
+  Dir.glob(File.join(zed_source_dir, "*")).each do |source_file|
+    next if File.directory?(source_file)
+
+    filename = File.basename(source_file)
+    target = File.join(zed_config_dir, filename)
+    link_if_needed(target, source_file)
+  end
+  puts "\n"
+end
 
 # Install mise if not already installed
 unless system("which mise > /dev/null 2>&1")
