@@ -54,7 +54,7 @@
   },
   "languages": {
     "Ruby": {
-      "language_servers": ["ruby-lsp", "rubocop"]
+      "language_servers": ["ruby-lsp"]
     }
   },
   "lsp": {
