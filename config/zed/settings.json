@@ -71,5 +71,11 @@
     "Tokyo Night": {
       "terminal.background": "#1a1f35"
     }
+  },
+  "agent_servers": {
+    "OpenCode": {
+      "command": "opencode",
+      "args": ["acp"]
+    }
   }
 }
