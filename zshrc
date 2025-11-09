@@ -32,12 +32,12 @@ alias be="bundle exec"
 alias br="bin/rails"
 alias g="git"
 alias s="g status -s"
-alias vs="code"
-alias ws="windsurf"
-alias c="cursor"
+
+
 alias popo="bin/rubocop -f github"
 alias prime="bin/rails dev:prime"
-alias dots="cursor ~/projects/config"
+alias dots="zed ~/projects/config"
+alias yc="claude --dangerously-skip-permissions"
 function hs(){
   heroku  "$@" --remote staging
 }
@@ -60,7 +60,8 @@ function find_routes() {
 
 alias hp="nocorrect hp"
 alias hs="nocorrect hs"
-
+alias mwt='eval "$(bin/wt --select)"'
+alias zw='bin/wt --select --open zed'
 # https://github.com/kevinSuttle/dotfiles/blob/9458141f40094d96952adc7c423cbdddeb909a81/functions
 searchAndDestroy() {
   lsof -i TCP:$1 | grep LISTEN | awk '{print $2}' | xargs kill -9
