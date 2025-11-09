@@ -6,6 +6,16 @@
   legacyheaders = false
   pager = delta
   excludesfile = ~/.gitignore_global
+[delta]
+    features = discord
+    navigate = true  # use n and N to move between diff sections
+    dark = true      # or light = true, or omit for auto-detection
+[merge]
+    conflictStyle = zdiff3
+[interactive]
+    diffFilter = delta --color-only
+[diff]
+	tool = nvimdiff
 [alias]
   co = checkout
   ci = commit
@@ -17,7 +27,7 @@
 	fs = flow feature start
 	ff = flow feature finish
 	pd = push origin develop
-	pm = push origin master
+	pm = push origin main
 	md = merge develop
 	cb = checkout -b
 	ci = commit
@@ -59,3 +69,6 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
+[include]
+    path = ~/.config/delta/themes.gitconfig
