@@ -7,7 +7,19 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "git": {
+    "hunk_style": "staged_hollow"
+  },
+  "collaboration_panel": {
+    "button": false
+  },
+  "outline_panel": {
+    "button": false,
+    "dock": "right"
+  },
   "git_panel": {
+    "button": true,
+    "collapse_untracked_diff": true,
     "scrollbar": {
       "show": "never"
     }
@@ -17,6 +29,10 @@
   },
   "icon_theme": "Monospace Icon Theme - Light",
   "project_panel": {
+    "default_width": 200.0,
+    "starts_open": true,
+    "git_status": true,
+    "hide_hidden": false,
     "hide_root": true,
     "entry_spacing": "standard",
     "dock": "left",
@@ -27,18 +43,33 @@
       "show": "never"
     }
   },
-  "ui_font_size": 16,
+  "ui_font_size": 18.0,
   "ui_font_family": "MonaspiceAr Nerd Font Mono",
   "buffer_font_family": "MonaspiceRn Nerd Font Mono",
   "buffer_font_size": 20,
   "theme": {
     "mode": "system",
-    "light": "Tokyo Night Storm",
+    "light": "Tokyo Night Light",
     "dark": "Tokyo Night"
   },
   "languages": {
     "Ruby": {
-      "language_servers": ["ruby-lsp"]
+      "language_servers": ["ruby-lsp", "rubocop"]
+    }
+  },
+  "lsp": {
+    "rubocop": {
+      "initialization_options": {
+        "safeAutocorrect": false
+      }
+    }
+  },
+  "theme_overrides": {
+    "Tokyo Night Light": {
+      "terminal.background": "#d1c8c5"
+    },
+    "Tokyo Night": {
+      "terminal.background": "#1a1f35"
     }
   }
 }
