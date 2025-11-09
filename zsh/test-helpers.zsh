@@ -530,6 +530,28 @@ function tg() {
   # Remove duplicates and empty lines
   all_test_files=$(echo "$all_test_files" | sort -u | grep -v '^$')
 
+  # Filter out deleted files
+  if [[ -n "$all_test_files" ]]; then
+    local deleted_files=$(git diff --name-only --diff-filter=D 2>/dev/null; git diff --cached --name-only --diff-filter=D 2>/dev/null)
+
+    if [[ -n "$deleted_files" ]]; then
+      local filtered_files=""
+      while IFS= read -r file; do
+        if [[ -n "$file" ]]; then
+          # Check if file is not in deleted_files list
+          if ! echo "$deleted_files" | grep -Fxq "$file"; then
+            if [[ -n "$filtered_files" ]]; then
+              filtered_files="$filtered_files"$'\n'"$file"
+            else
+              filtered_files="$file"
+            fi
+          fi
+        fi
+      done <<< "$all_test_files"
+      all_test_files="$filtered_files"
+    fi
+  fi
+
   if [ -n "$all_test_files" ]; then
     echo "Running tests on modified files and their related specs:"
     echo "$all_test_files" | sed 's/^/  /'
@@ -628,6 +650,28 @@ function tgf() {
 
   # Remove duplicates and empty lines
   all_test_files=$(echo "$all_test_files" | sort -u | grep -v '^$')
+
+  # Filter out deleted files
+  if [[ -n "$all_test_files" ]]; then
+    local deleted_files=$(git diff --name-only --diff-filter=D 2>/dev/null; git diff --cached --name-only --diff-filter=D 2>/dev/null)
+
+    if [[ -n "$deleted_files" ]]; then
+      local filtered_files=""
+      while IFS= read -r file; do
+        if [[ -n "$file" ]]; then
+          # Check if file is not in deleted_files list
+          if ! echo "$deleted_files" | grep -Fxq "$file"; then
+            if [[ -n "$filtered_files" ]]; then
+              filtered_files="$filtered_files"$'\n'"$file"
+            else
+              filtered_files="$file"
+            fi
+          fi
+        fi
+      done <<< "$all_test_files"
+      all_test_files="$filtered_files"
+    fi
+  fi
 
   if [ -n "$all_test_files" ]; then
     echo "Running tests on modified files and their related specs (failures only):"
