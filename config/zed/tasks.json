@@ -16,6 +16,19 @@
     "use_new_terminal": true
   },
   {
+    "label": "CodeRabbit",
+    "command": "coderabbit review",
+    "shell": {
+      "program": "bash"
+    },
+    "hide": "on_success",
+    "reveal_target": "center",
+    "show_summary": false,
+    "show_command": false,
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true
+  },
+  {
     "label": "Open Worktree",
     "command": "bin/wt --select --open zed",
     "shell": {

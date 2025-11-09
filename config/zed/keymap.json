@@ -12,6 +12,10 @@
       "cmd-shift-g": [
         "task::Spawn",
         { "task_name": "LazyGit", "reveal_target": "center" }
+      ],
+      "cmd-shift-c": [
+        "task::Spawn",
+        { "task_name": "CodeRabbit", "reveal_target": "center" }
       ]
     }
   },
@@ -91,6 +95,20 @@
     "context": "Pane",
     "bindings": {
       "cmd-9": ["pane::ActivateItem", 8]
+    }
+  },
+  {
+    "context": "Pane",
+    "bindings": {
+      "cmd-shift-alt-ctrl-left": "pane::SplitAndMoveLeft",
+      "cmd-shift-alt-ctrl-right": "pane::SplitAndMoveRight",
+      "cmd-shift-alt-ctrl-up": "pane::SplitAndMoveUp",
+      "cmd-shift-alt-ctrl-down": "pane::SplitAndMoveDown"
+    }
+  },
+  {
+    "bindings": {
+      "cmd-shift-c": null
     }
   }
 ]

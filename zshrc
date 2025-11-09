@@ -78,3 +78,6 @@ source $HOME/zsh/ruby-helpers.zsh
 alias aic="tg && popo"
 
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+# Added by CodeRabbit CLI installer
+export PATH="/Users/Scott.Watermasysk/.local/bin:$PATH"
