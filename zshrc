@@ -31,6 +31,7 @@ alias bd="bin/dev"
 alias be="bundle exec"
 alias br="bin/rails"
 alias g="git"
+alias lg="lazygit"
 alias s="g status -s"
 
 
