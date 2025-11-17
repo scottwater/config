@@ -72,3 +72,5 @@
 
 [include]
     path = ~/.config/delta/themes.gitconfig
+[rebase]
+	updateRefs = true
