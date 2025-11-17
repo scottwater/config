@@ -79,6 +79,28 @@ if File.exist?(zed_source_dir)
   puts "\n"
 end
 
+# Opencode config files - symlink individual files and subdirectories
+opencode_config_dir = File.join(config_path, "opencode")
+opencode_source_dir = File.join(script_dir, "config", "opencode")
+
+if File.exist?(opencode_source_dir)
+  puts "Installing Opencode config files"
+
+  # Ensure ~/.config/opencode directory exists
+  unless Dir.exist?(opencode_config_dir)
+    puts "Creating #{opencode_config_dir} directory"
+    FileUtils.mkdir_p(opencode_config_dir)
+  end
+
+  # Symlink each file and subdirectory in the opencode config directory
+  Dir.glob(File.join(opencode_source_dir, "*")).each do |source_item|
+    item_name = File.basename(source_item)
+    target = File.join(opencode_config_dir, item_name)
+    link_if_needed(target, source_item)
+  end
+  puts "\n"
+end
+
 # Install mise if not already installed
 unless system("which mise > /dev/null 2>&1")
   puts "Installing mise..."
