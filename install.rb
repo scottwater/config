@@ -52,7 +52,7 @@ link_if_needed(starship_target, starship_source)
 puts "\n"
 
 # Config directory files
-configs = %w[atuin kitty nvim ghostty delta]
+configs = %w[atuin kitty nvim ghostty delta lazygit]
 install_links(configs, File.join(script_dir, "config"), config_path, prefix: "")
 
 # Zed config files - symlink individual files

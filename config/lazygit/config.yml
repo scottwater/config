@@ -1,0 +1,9 @@
+gui:
+  nerdFontsVersion: "3"
+  showDivergenceFromBaseBranch: "arrowAndNumber"
+  switchTabsWithPanelJumpKeys: true
+  enlargedSideViewLocation: top
+git:
+  pagers:
+    - pager: delta --paging=never
+      colorArg: always
