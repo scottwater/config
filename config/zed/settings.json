@@ -77,5 +77,6 @@
       "command": "opencode",
       "args": ["acp"]
     }
-  }
+  },
+  "file_scan_exclusions": [".worktrees/", "*.log"]
 }
