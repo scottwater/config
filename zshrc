@@ -82,3 +82,4 @@ export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 # Added by CodeRabbit CLI installer
 export PATH="/Users/Scott.Watermasysk/.local/bin:$PATH"
+export XDG_CONFIG_HOME="$HOME/.config"
