@@ -78,5 +78,5 @@
       "args": ["acp"]
     }
   },
-  "file_scan_exclusions": [".worktrees/", "*.log"]
+  "file_scan_exclusions": [".worktrees/", "*.log", ".conductor/"]
 }
