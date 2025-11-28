@@ -108,7 +108,10 @@
   },
   {
     "bindings": {
-      "cmd-shift-c": null
+      "cmd-shift-c": [
+        "task::Spawn",
+        { "task_name": "CodeRabbit", "reveal_target": "center" }
+      ]
     }
   }
 ]
