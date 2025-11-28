@@ -1,0 +1,140 @@
+#!/usr/bin/env zsh
+
+# =============================================================================
+# rubocop-git - Run Rubocop on Git-Modified Files
+# =============================================================================
+# Runs rubocop with auto-correct on git-modified .rb files, or on specified
+# files if provided.
+#
+# Usage: rubocop-git [options] [files...]
+#
+# If no files specified, runs on all git-modified .rb files.
+# If files specified, filters to only .rb files and runs on those.
+#
+# Options:
+#   --no-autocorrect     Don't auto-correct (default is -A)
+#   -h, --help           Show help
+#
+# Examples:
+#   rubocop-git                    # All git-modified .rb files
+#   rubocop-git app/models/*.rb    # Specific files
+
+set -e
+
+# -----------------------------------------------------------------------------
+# HELPER FUNCTIONS
+# -----------------------------------------------------------------------------
+
+_show_help() {
+  echo "Usage: rubocop-git [options] [files...]"
+  echo ""
+  echo "If no files specified, runs on all git-modified .rb files."
+  echo "If files specified, filters to only .rb files and runs on those."
+  echo ""
+  echo "Options:"
+  echo "  --no-autocorrect     Don't auto-correct (default is -A)"
+  echo "  -h, --help           Show help"
+  echo ""
+  echo "Examples:"
+  echo "  rubocop-git                    # All git-modified .rb files"
+  echo "  rubocop-git app/models/*.rb    # Specific files"
+}
+
+# Gets all git-modified .rb files
+_get_git_modified_ruby_files() {
+  local changed_files=$(git diff --name-only 2>/dev/null)
+  local staged_files=$(git diff --cached --name-only 2>/dev/null)
+  local untracked_files=$(git ls-files --others --exclude-standard 2>/dev/null)
+
+  echo "$changed_files\n$staged_files\n$untracked_files" | sort -u | grep -v '^$' | grep '\.rb$'
+}
+
+# -----------------------------------------------------------------------------
+# MAIN LOGIC
+# -----------------------------------------------------------------------------
+
+main() {
+  local autocorrect=true
+  local show_help=false
+  local specified_files=()
+  local rubocop_opts=()
+
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --no-autocorrect)
+        autocorrect=false
+        shift
+        ;;
+      -h|--help)
+        show_help=true
+        shift
+        ;;
+      -*)
+        # Pass through other options to rubocop
+        rubocop_opts+=("$1")
+        shift
+        ;;
+      *)
+        # File argument
+        specified_files+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  # Handle help
+  if [[ $show_help == true ]]; then
+    _show_help
+    exit 0
+  fi
+
+  local ruby_files=()
+
+  if [[ ${#specified_files[@]} -gt 0 ]]; then
+    # Filter specified files to only .rb files that exist
+    for file in "${specified_files[@]}"; do
+      if [[ "$file" == *.rb && -f "$file" ]]; then
+        ruby_files+=("$file")
+      fi
+    done
+
+    if [[ ${#ruby_files[@]} -eq 0 ]]; then
+      echo "No .rb files found in the provided list."
+      exit 0
+    fi
+
+    echo "Running rubocop on specified .rb files:"
+    printf "  %s\n" "${ruby_files[@]}"
+    echo ""
+  else
+    # Get git-modified .rb files
+    local modified_files=$(_get_git_modified_ruby_files)
+
+    if [[ -z "$modified_files" ]]; then
+      echo "No modified .rb files found."
+      exit 0
+    fi
+
+    # Convert to array
+    ruby_files=(${(f)modified_files})
+
+    echo "Running rubocop on modified .rb files:"
+    printf "  %s\n" "${ruby_files[@]}"
+    echo ""
+  fi
+
+  # Build rubocop command
+  local rubocop_args=("-f" "github")
+
+  if [[ $autocorrect == true ]]; then
+    rubocop_args+=("-A")
+  fi
+
+  rubocop_args+=("${rubocop_opts[@]}")
+  rubocop_args+=("${ruby_files[@]}")
+
+  bin/rubocop "${rubocop_args[@]}"
+}
+
+main "$@"

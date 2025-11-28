@@ -1,0 +1,563 @@
+#!/usr/bin/env zsh
+
+# =============================================================================
+# t - Unified Test Runner
+# =============================================================================
+# A test runner that works with RSpec and Rails test frameworks.
+# Supports profile configuration, git-modified file detection, and fail-fast
+# with seed persistence.
+#
+# Usage: t [options] [files...]
+#
+# Options:
+#   -g, --git            Run only on git-modified test files (+ related specs)
+#   -f, --failures-only  Only show failures (--only-failures)
+#   --ff, --fail-fast    Fail fast with seed management
+#   --profile NAME       Use profile from .t config (can be repeated)
+#   --no-profile         Skip default profile
+#   --seed NUM           Use specific seed
+#   --generate           Generate .t config file
+#   -h, --help           Show help
+#
+# Examples:
+#   t                      # Run all tests (with default profile if .t exists)
+#   t -g                   # Git-modified files only
+#   t -g -f                # Git-modified, failures only
+#   t --ff                 # Fail-fast with seed persistence
+#   t -g --ff              # Git-modified + fail-fast
+#   t --profile slow       # Use slow profile
+#   t spec/models          # Run specific directory
+
+set -e
+
+# -----------------------------------------------------------------------------
+# CONFIGURATION
+# -----------------------------------------------------------------------------
+
+# Global associative array to store test configuration profiles
+typeset -A _TEST_CONFIG
+
+# -----------------------------------------------------------------------------
+# SEED FILE MANAGEMENT
+# -----------------------------------------------------------------------------
+
+# Generate seed file path from current directory
+_get_seed_file() {
+  local dir_name=$(basename "$PWD")
+  local dir_hash=$(echo "$PWD" | md5 | cut -c1-8)
+  echo "/tmp/t-seed-${dir_name}-${dir_hash}"
+}
+
+# Read seed from file if exists
+_read_seed() {
+  local seed_file=$(_get_seed_file)
+  if [[ -f "$seed_file" ]]; then
+    cat "$seed_file"
+  fi
+}
+
+# Write seed to file on failure
+_write_seed() {
+  local seed="$1"
+  local seed_file=$(_get_seed_file)
+  echo "$seed" > "$seed_file"
+  echo "Seed saved to $seed_file for re-run" >&2
+}
+
+# Delete seed file on success
+_clear_seed() {
+  local seed_file=$(_get_seed_file)
+  rm -f "$seed_file"
+}
+
+# -----------------------------------------------------------------------------
+# HELPER FUNCTIONS
+# -----------------------------------------------------------------------------
+
+# Parses .t configuration file and populates _TEST_CONFIG associative array
+_parse_test_config() {
+  _TEST_CONFIG=()
+
+  if [[ ! -f ".t" ]]; then
+    return 0
+  fi
+
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" =~ '^[[:space:]]*#' ]] && continue
+
+    if [[ "$line" == *":"* ]]; then
+      local profile="${line%%:*}"
+      local args="${line#*:}"
+
+      profile="${profile#"${profile%%[![:space:]]*}"}"
+      profile="${profile%"${profile##*[![:space:]]}"}"
+      args="${args#"${args%%[![:space:]]*}"}"
+
+      if [[ -n "$profile" ]]; then
+        _TEST_CONFIG[$profile]="$args"
+      fi
+    fi
+  done < ".t"
+}
+
+# Resolves profile references recursively
+_resolve_profile_reference() {
+  local profile_name="$1"
+  local visited_profiles=("${@:2}")
+  local profile_value="${_TEST_CONFIG[$profile_name]:-}"
+
+  if [[ -z "$profile_value" ]]; then
+    return 1
+  fi
+
+  for visited in "${visited_profiles[@]}"; do
+    if [[ "$visited" == "$profile_name" ]]; then
+      echo "Error: Circular profile reference detected: ${visited_profiles[*]} -> $profile_name" >&2
+      return 1
+    fi
+  done
+
+  if [[ "$profile_value" =~ ^--([a-zA-Z0-9_-]+)$ ]]; then
+    local referenced_profile="${profile_value#--}"
+    _resolve_profile_reference "$referenced_profile" "${visited_profiles[@]}" "$profile_name"
+  else
+    echo "$profile_value"
+  fi
+}
+
+# Shows help information including available profiles
+_show_help() {
+  echo "Usage: t [options] [files...]"
+  echo ""
+  echo "Options:"
+  echo "  -g, --git            Run only on git-modified test files (+ related specs)"
+  echo "  -f, --failures-only  Only show failures (--only-failures)"
+  echo "  --ff, --fail-fast    Fail fast with seed management"
+  echo "  --profile NAME       Use profile from .t config (can be repeated)"
+  echo "  --no-profile         Skip default profile"
+  echo "  --seed NUM           Use specific seed"
+  echo "  --generate           Generate .t config file"
+  echo "  -h, --help           Show help"
+  echo ""
+  echo "Examples:"
+  echo "  t                      # Run all tests (with default profile if .t exists)"
+  echo "  t -g                   # Git-modified files only"
+  echo "  t -g -f                # Git-modified, failures only"
+  echo "  t --ff                 # Fail-fast with seed persistence"
+  echo "  t -g --ff              # Git-modified + fail-fast"
+  echo "  t --profile slow       # Use slow profile"
+  echo "  t spec/models          # Run specific directory"
+
+  _parse_test_config
+  if [[ ${#_TEST_CONFIG[@]} -gt 0 ]]; then
+    echo ""
+    echo "Available profiles from .t file:"
+    for profile in "${(@k)_TEST_CONFIG}"; do
+      printf "  %-12s %s\n" "$profile:" "${_TEST_CONFIG[$profile]}"
+    done
+  fi
+}
+
+# Detects which test framework is being used
+_detect_test_framework() {
+  if [[ -d "spec" ]]; then
+    echo "rspec"
+  elif [[ -d "test" ]]; then
+    echo "rails"
+  else
+    echo "none"
+  fi
+}
+
+# Gets all git-modified files matching a pattern
+_get_git_modified_files() {
+  local pattern="$1"
+
+  local changed_files=$(git diff --name-only 2>/dev/null)
+  local staged_files=$(git diff --cached --name-only 2>/dev/null)
+  local untracked_files=$(git ls-files --others --exclude-standard 2>/dev/null)
+
+  echo "$changed_files\n$staged_files\n$untracked_files" | sort -u | grep -v '^$' | grep "$pattern"
+}
+
+# Find the corresponding spec file for a given source file
+_find_related_spec() {
+  local source_file="$1"
+  local spec_file=""
+
+  if [[ "$source_file" =~ _spec\.rb$ ]] || [[ "$source_file" =~ _test\.rb$ ]]; then
+    return
+  fi
+
+  if [[ ! "$source_file" =~ \.rb$ ]]; then
+    return
+  fi
+
+  local base_name="${source_file%.rb}"
+
+  if [[ "$source_file" == app/* ]]; then
+    local path_without_app="${base_name#app/}"
+    spec_file="spec/${path_without_app}_spec.rb"
+  elif [[ "$source_file" == lib/* ]]; then
+    spec_file="spec/${base_name}_spec.rb"
+  else
+    spec_file="spec/${base_name}_spec.rb"
+  fi
+
+  if [[ -f "$spec_file" ]]; then
+    echo "$spec_file"
+  fi
+}
+
+# Generates a default .t configuration file
+_generate_test_config() {
+  if [[ -f ".t" ]]; then
+    echo "Error: .t file already exists. Delete it first if you want to generate a new one." >&2
+    return 1
+  fi
+
+  local framework=$(_detect_test_framework)
+
+  if [[ "$framework" == "none" ]]; then
+    echo "Error: No test framework detected (no spec/ or test/ directory found)." >&2
+    return 1
+  fi
+
+  echo "Generating .t configuration file for $framework framework..."
+
+  case $framework in
+    "rspec")
+      cat > .t << 'EOF'
+# Test configuration profiles
+# Usage: t --profile <profile_name>
+
+default: --fast
+fast: --tag ~type:system --tag ~speed:slow
+slow: --tag type:system --tag speed:slow
+EOF
+      ;;
+    "rails")
+      cat > .t << 'EOF'
+# Test configuration profiles
+# Usage: t --profile <profile_name>
+
+default: --fast
+fast: test/models test/controllers test/helpers test/mailers test/jobs
+slow: test/system
+EOF
+      ;;
+  esac
+
+  echo ".t file generated successfully!"
+  echo "You can customize the profiles by editing the .t file."
+}
+
+# Executes tests using the appropriate command
+_run_tests() {
+  local framework="$1"
+  shift
+  local files="$1"
+  shift
+  local args=("$@")
+
+  case $framework in
+    "rspec")
+      if [[ -n "$files" ]]; then
+        bundle exec rspec $(echo "$files" | tr '\n' ' ') "${args[@]}"
+      else
+        bundle exec rspec "${args[@]}"
+      fi
+      ;;
+    "rails")
+      if [[ -n "$files" ]]; then
+        bin/rails test $(echo "$files" | tr '\n' ' ') "${args[@]}"
+      else
+        bin/rails test "${args[@]}"
+      fi
+      ;;
+    *)
+      echo "No spec or test directory found."
+      return 1
+      ;;
+  esac
+}
+
+# Get git-modified test files and their related specs
+_get_git_test_files() {
+  local framework="$1"
+  local pattern
+
+  if [[ "$framework" == "rspec" ]]; then
+    pattern="_spec\.rb$"
+  else
+    pattern="_test\.rb$"
+  fi
+
+  local test_files=$(_get_git_modified_files "$pattern")
+
+  local all_modified_files=$(git diff --name-only 2>/dev/null)
+  all_modified_files="$all_modified_files"$'\n'$(git diff --cached --name-only 2>/dev/null)
+  all_modified_files="$all_modified_files"$'\n'$(git ls-files --others --exclude-standard 2>/dev/null)
+
+  local related_specs=""
+
+  while IFS= read -r file; do
+    if [[ -n "$file" ]]; then
+      local spec_file=$(_find_related_spec "$file")
+      if [[ -n "$spec_file" ]]; then
+        related_specs="$related_specs"$'\n'"$spec_file"
+      fi
+    fi
+  done <<< "$all_modified_files"
+
+  local all_test_files=""
+  if [[ -n "$test_files" ]]; then
+    all_test_files="$test_files"
+  fi
+  if [[ -n "$related_specs" ]]; then
+    if [[ -n "$all_test_files" ]]; then
+      all_test_files="$all_test_files"$'\n'"$related_specs"
+    else
+      all_test_files="$related_specs"
+    fi
+  fi
+
+  all_test_files=$(echo "$all_test_files" | sort -u | grep -v '^$')
+
+  # Filter out deleted files
+  if [[ -n "$all_test_files" ]]; then
+    local deleted_files=$(git diff --name-only --diff-filter=D 2>/dev/null; git diff --cached --name-only --diff-filter=D 2>/dev/null)
+
+    if [[ -n "$deleted_files" ]]; then
+      local filtered_files=""
+      while IFS= read -r file; do
+        if [[ -n "$file" ]]; then
+          if ! echo "$deleted_files" | grep -Fxq "$file"; then
+            if [[ -n "$filtered_files" ]]; then
+              filtered_files="$filtered_files"$'\n'"$file"
+            else
+              filtered_files="$file"
+            fi
+          fi
+        fi
+      done <<< "$all_test_files"
+      all_test_files="$filtered_files"
+    fi
+  fi
+
+  echo "$all_test_files"
+}
+
+# -----------------------------------------------------------------------------
+# MAIN LOGIC
+# -----------------------------------------------------------------------------
+
+main() {
+  local git_mode=false
+  local failures_only=false
+  local fail_fast=false
+  local use_profile=true
+  local specified_profiles=()
+  local explicit_seed=""
+  local show_help=false
+  local generate_config=false
+  local passthrough_args=()
+
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -g|--git)
+        git_mode=true
+        shift
+        ;;
+      -f|--failures-only)
+        failures_only=true
+        shift
+        ;;
+      --ff|--fail-fast)
+        fail_fast=true
+        shift
+        ;;
+      --profile)
+        if [[ -n "$2" && "$2" != -* ]]; then
+          if [[ "$2" == *","* ]]; then
+            IFS=',' read -A profile_array <<< "$2"
+            specified_profiles+=("${profile_array[@]}")
+          else
+            specified_profiles+=("$2")
+          fi
+          shift 2
+        else
+          echo "Error: --profile requires a profile name" >&2
+          exit 1
+        fi
+        ;;
+      --profile=*)
+        local profile_list="${1#*=}"
+        if [[ "$profile_list" == *","* ]]; then
+          IFS=',' read -A profile_array <<< "$profile_list"
+          specified_profiles+=("${profile_array[@]}")
+        else
+          specified_profiles+=("$profile_list")
+        fi
+        shift
+        ;;
+      --no-profile)
+        use_profile=false
+        shift
+        ;;
+      --seed)
+        if [[ -n "$2" && "$2" != -* ]]; then
+          explicit_seed="$2"
+          shift 2
+        else
+          echo "Error: --seed requires a number" >&2
+          exit 1
+        fi
+        ;;
+      --seed=*)
+        explicit_seed="${1#*=}"
+        shift
+        ;;
+      --generate)
+        generate_config=true
+        shift
+        ;;
+      -h|--help)
+        show_help=true
+        shift
+        ;;
+      --*)
+        # Check if it's a profile shortcut
+        _parse_test_config
+        local potential_profile="${1#--}"
+        if [[ -n "${_TEST_CONFIG[$potential_profile]:-}" ]]; then
+          specified_profiles+=("$potential_profile")
+        else
+          passthrough_args+=("$1")
+        fi
+        shift
+        ;;
+      *)
+        passthrough_args+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  # Handle help
+  if [[ $show_help == true ]]; then
+    _show_help
+    exit 0
+  fi
+
+  # Handle config generation
+  if [[ $generate_config == true ]]; then
+    _generate_test_config
+    exit $?
+  fi
+
+  # Detect framework
+  local framework=$(_detect_test_framework)
+  if [[ "$framework" == "none" ]]; then
+    echo "No spec or test directory found." >&2
+    exit 1
+  fi
+
+  # Build test arguments
+  local test_args=()
+
+  # Handle profile arguments
+  if [[ $use_profile == true ]]; then
+    _parse_test_config
+
+    local profiles_to_use=()
+    if [[ ${#specified_profiles[@]} -eq 0 ]]; then
+      profiles_to_use=("default")
+    else
+      profiles_to_use=("${specified_profiles[@]}")
+    fi
+
+    for target_profile in "${profiles_to_use[@]}"; do
+      [[ -z "$target_profile" ]] && continue
+
+      if [[ -n "${_TEST_CONFIG[$target_profile]:-}" ]]; then
+        local resolved_profile_args
+        resolved_profile_args=$(_resolve_profile_reference "$target_profile")
+        local resolve_status=$?
+
+        if [[ $resolve_status -ne 0 ]]; then
+          exit $resolve_status
+        fi
+
+        local single_profile_args=(${=resolved_profile_args})
+        test_args+=("${single_profile_args[@]}")
+      elif [[ "$target_profile" != "default" || ${#specified_profiles[@]} -gt 0 ]]; then
+        echo "Error: Profile '$target_profile' not found in .t file" >&2
+        if [[ ${#_TEST_CONFIG[@]} -gt 0 ]]; then
+          echo "Available profiles: ${(k)_TEST_CONFIG[*]}" >&2
+        fi
+        exit 1
+      fi
+    done
+  fi
+
+  # Handle failures-only
+  if [[ $failures_only == true ]]; then
+    test_args+=("--only-failures")
+  fi
+
+  # Handle fail-fast with seed
+  local current_seed=""
+  if [[ $fail_fast == true ]]; then
+    test_args+=("--fail-fast")
+
+    if [[ -n "$explicit_seed" ]]; then
+      current_seed="$explicit_seed"
+    else
+      current_seed=$(_read_seed)
+      if [[ -z "$current_seed" ]]; then
+        current_seed=$RANDOM
+      fi
+    fi
+    test_args+=("--seed=$current_seed")
+  elif [[ -n "$explicit_seed" ]]; then
+    current_seed="$explicit_seed"
+    test_args+=("--seed=$current_seed")
+  fi
+
+  # Add passthrough args
+  test_args+=("${passthrough_args[@]}")
+
+  # Get test files
+  local test_files=""
+  if [[ $git_mode == true ]]; then
+    test_files=$(_get_git_test_files "$framework")
+
+    if [[ -z "$test_files" ]]; then
+      echo "No modified test files or related specs found."
+      exit 0
+    fi
+
+    echo "Running tests on modified files and their related specs:"
+    echo "$test_files" | sed 's/^/  /'
+    echo ""
+  fi
+
+  # Run tests
+  _run_tests "$framework" "$test_files" "${test_args[@]}"
+  local test_status=$?
+
+  # Handle seed persistence
+  if [[ $fail_fast == true ]]; then
+    if [[ $test_status -eq 0 ]]; then
+      _clear_seed
+    else
+      _write_seed "$current_seed"
+    fi
+  fi
+
+  exit $test_status
+}
+
+main "$@"

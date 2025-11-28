@@ -63,20 +63,14 @@ alias hp="nocorrect hp"
 alias hs="nocorrect hs"
 alias mwt='eval "$(bin/wt --select)"'
 alias zw='bin/wt --select --open zed'
+alias tg='t -g'
+alias tf='t -f'
+alias tff='t --ff'
 # https://github.com/kevinSuttle/dotfiles/blob/9458141f40094d96952adc7c423cbdddeb909a81/functions
 searchAndDestroy() {
   lsof -i TCP:$1 | grep LISTEN | awk '{print $2}' | xargs kill -9
   echo "Port" $1 "found and killed."
 }
-
-
-# Load test helpers
-source $HOME/zsh/test-helpers.zsh
-
-# Load ruby helpers
-source $HOME/zsh/ruby-helpers.zsh
-
-alias aic="tg && popo"
 
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
