@@ -18,6 +18,7 @@
 	tool = nvimdiff
 [alias]
   co = checkout
+  s = switch
   ci = commit
   st = status
   br = branch
@@ -74,3 +75,7 @@
     path = ~/.config/delta/themes.gitconfig
 [rebase]
 	updateRefs = true
+[coderabbit]
+	machineId = cli/a35d2acf9d9545609d33825ab4861226
+[advice]
+	skippedCherryPicks = false
