@@ -81,5 +81,8 @@ alias aic="tg && popo"
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 # Added by CodeRabbit CLI installer
-export PATH="/Users/Scott.Watermasysk/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 export XDG_CONFIG_HOME="$HOME/.config"
+
+# Add repo's bin folder to PATH (resolves symlink to find actual location)
+export PATH="${0:A:h}/bin:$PATH"
