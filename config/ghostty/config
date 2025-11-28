@@ -3,3 +3,5 @@ font-size = 18
 
 theme = "light:tokyonight day,dark:tokyonight night"
 keybind = shift+enter=text:\n
+
+auto-update-channel = tip
