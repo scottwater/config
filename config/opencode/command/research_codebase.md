@@ -1,5 +1,5 @@
 ---
-description: Research codebase comprehensively with parallel sub-agents
+description: Research codebase comprehensively with parallel sub-agents [research query or topic]
 ---
 
 # Research Codebase
@@ -36,4 +36,4 @@ Use this command when you need to:
 - The skill is a documentarian, not a critic
 - It describes what exists, not what should be improved
 - All findings are backed by concrete file references
-- Research is stored in `thoughts/shared/research/` with proper metadata
+- Research is stored in `workflow/research/` with proper metadata

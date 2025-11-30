@@ -7,6 +7,8 @@ description: Convert Claude Code Subagents to OpenCode Agents format. Use when m
 
 This skill helps you convert Claude Code Subagent definitions (from `.claude/agents/` or `~/.claude/agents/`) to OpenCode Agent format (`.opencode/agent/` or `~/.config/opencode/agent/`).
 
+**Note:** When running from a personal config that symlinks to `~/.config/opencode/`, the agent files will be available globally.
+
 ## Quick Reference
 
 **Source formats:**

@@ -7,6 +7,8 @@ description: Convert Claude Code slash commands to OpenCode commands format. Use
 
 This skill helps you convert Claude Code slash command definitions (from `.claude/commands/` or `~/.claude/commands/`) to OpenCode command format (`.opencode/command/` or `~/.config/opencode/command/`).
 
+**Note:** When running from a personal config that symlinks to `~/.config/opencode/`, the command files will be available globally.
+
 ## Quick Reference
 
 **Source formats:**
