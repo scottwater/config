@@ -39,6 +39,10 @@ alias popo="bin/rubocop -f github"
 alias prime="bin/rails dev:prime"
 alias dots="zed ~/projects/config"
 alias yc="claude --dangerously-skip-permissions"
+
+function oc() {
+  opencode "${1:-.}"
+}
 function hs(){
   heroku  "$@" --remote staging
 }
