@@ -27,7 +27,6 @@ alias rspec='nocorrect rspec'
 alias reload="source ~/.zshrc"
 alias tpd="tail -f ~/Library/Logs/puma-dev.log"
 alias rc="bundle exec rails console"
-alias bd="bin/dev"
 alias be="bundle exec"
 alias br="bin/rails"
 alias g="git"
