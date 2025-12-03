@@ -1,5 +1,9 @@
 ---
 description: "Create detailed implementation plans with thorough research and iteration [optional: ticket file or description]"
+tools:
+  read: true
+  write: true
+  webfetch: true
 ---
 
 # Implementation Plan
@@ -170,10 +174,7 @@ Once aligned on approach:
 
 After structure approval:
 
-1. **Gather metadata** by running:
-   ```bash
-   spec_metadata
-   ```
+1. **Gather metadata** using the `spec_metadata` tool
 
 2. **Write the plan** to `workflow/plans/YYYY-MM-DD-ENG-XXXX-description.md`
    - Format: `YYYY-MM-DD-ENG-XXXX-description.md` where:

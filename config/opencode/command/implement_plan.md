@@ -1,5 +1,9 @@
 ---
 description: Implement technical plans from workflow/plans with verification [path to plan file]
+tools:
+  read: true
+  write: true
+  webfetch: true
 ---
 
 # Implement Plan

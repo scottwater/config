@@ -1,6 +1,9 @@
 ---
 description: Research codebase comprehensively using parallel sub-agents
-model: opus
+tools:
+  read: true
+  write: true
+  webfetch: true
 ---
 
 # Research Codebase
@@ -91,11 +94,7 @@ Then:
 
 **CRITICAL: DO THIS BEFORE WRITING THE DOCUMENT**
 
-Run the metadata script:
-
-```bash
-spec_metadata
-```
+Use the `spec_metadata` tool to gather metadata:
 
 This generates:
 - Current date/time with timezone (ISO format)
@@ -255,7 +254,7 @@ Before finalizing research:
 
 - [ ] All mentioned files read fully in main context
 - [ ] All sub-agents completed and results synthesized
-- [ ] Metadata gathered using `spec_metadata` script
+- [ ] Metadata gathered using `spec_metadata` tool
 - [ ] YAML frontmatter complete and correct
 - [ ] Document filename follows naming convention
 - [ ] workflow/ paths are correct and follow directory structure
