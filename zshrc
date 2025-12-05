@@ -9,7 +9,7 @@ source $HOME/zsh/zsh-z.plugin.zsh
 autoload -U compinit; compinit
 zstyle ':completion:*' menu select
 
-export EDITOR=nvim
+export EDITOR=zed
 set -o emacs
 
 
