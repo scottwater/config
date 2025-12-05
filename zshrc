@@ -82,5 +82,5 @@ export PATH="$HOME/.local/bin:$PATH"
 export XDG_CONFIG_HOME="$HOME/.config"
 
 # Add repo's bin folder to PATH (resolves symlink to find actual location)
-export PATH="${0:A:h}/bin:$PATH"
+export PATH="${${(%):-%x}:A:h}/bin:$PATH"
 export RAILS_EDITOR="zed"
