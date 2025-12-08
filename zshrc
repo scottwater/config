@@ -84,3 +84,6 @@ export XDG_CONFIG_HOME="$HOME/.config"
 # Add repo's bin folder to PATH (resolves symlink to find actual location)
 export PATH="${${(%):-%x}:A:h}/bin:$PATH"
 export RAILS_EDITOR="zed"
+
+# AMP toolbox directory (resolves symlink to find actual location)
+export AMP_TOOLBOX="${${(%):-%x}:A:h}/config/amp/tools"

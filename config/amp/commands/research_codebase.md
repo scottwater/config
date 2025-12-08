@@ -90,11 +90,7 @@ Then:
 
 **CRITICAL: DO THIS BEFORE WRITING THE DOCUMENT**
 
-Run `spec_metadata` via Bash to gather metadata:
-
-```bash
-spec_metadata
-```
+Call the `spec_metadata` tool to gather metadata. If the tool is not available, inform the user that `AMP_TOOLBOX` environment variable must be set to the tools directory (e.g., `export AMP_TOOLBOX="$HOME/config/config/amp/tools"`).
 
 This generates:
 - Current date/time with timezone (ISO format)

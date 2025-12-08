@@ -170,9 +170,11 @@ Once aligned on approach:
 
 After structure approval:
 
-1. **Gather metadata** by running `spec_metadata` via Bash to get current date, git commit, branch, and repository info
+1. **Check AMP_TOOLBOX is configured**: Verify the `spec_metadata` tool is available. If calling the tool fails, inform the user that `AMP_TOOLBOX` environment variable must be set to the tools directory (e.g., `export AMP_TOOLBOX="$HOME/config/config/amp/tools"`).
 
-2. **Write the plan** to `workflow/plans/YYYY-MM-DD-ENG-XXXX-description.md`
+2. **Gather metadata** by calling the `spec_metadata` tool to get current date, git commit, branch, and repository info
+
+3. **Write the plan** to `workflow/plans/YYYY-MM-DD-ENG-XXXX-description.md`
    - Format: `YYYY-MM-DD-ENG-XXXX-description.md` where:
      - YYYY-MM-DD is today's date
      - ENG-XXXX is the ticket number (omit if no ticket)
@@ -181,7 +183,7 @@ After structure approval:
      - With ticket: `workflow/plans/2025-01-08-ENG-1478-parent-child-tracking.md`
      - Without ticket: `workflow/plans/2025-01-08-improve-error-handling.md`
 
-3. **Use this template structure**:
+4. **Use this template structure**:
 
 ````markdown
 ---
