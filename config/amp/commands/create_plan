@@ -1,0 +1,220 @@
+#!/bin/bash
+# create_plan - Create detailed implementation plans with thorough research and iteration
+
+TOPIC="$*"
+
+if [ -z "$TOPIC" ]; then
+  # No argument provided - scan workflow directory for plannable items
+  cat << 'EOF'
+Let me check the workflow directory for items that might need a plan...
+
+**Scanning workflow directory for tickets, research, and other plannable items...**
+
+Use the finder or Read tool to explore:
+- `workflow/tickets/` for any tickets that don't have corresponding plans
+- `workflow/research/` for research that might be ready for planning
+- `workflow/` root for any other relevant documents
+
+After scanning, present what you find:
+
+```
+Based on the workflow directory, here's what I found that might need a plan:
+
+**Tickets without plans:**
+- [ticket-name.md] - Brief description
+
+**Research that could lead to plans:**
+- [research-name.md] - Brief description
+
+**Other potential items:**
+- [item] - Brief description
+
+Which would you like me to plan? Or provide a different topic/ticket path.
+```
+
+**IMPORTANT: Do NOT start creating a plan until the user confirms which item to plan.**
+
+If nothing obvious is found, respond:
+```
+I didn't find any obvious items in workflow/ that need planning.
+
+Please provide:
+1. A ticket file path (e.g., workflow/tickets/eng_1234.md)
+2. A description of what you'd like to plan
+3. Or a research document that's ready for implementation planning
+
+Example: `/create_plan workflow/tickets/eng_1234.md`
+```
+EOF
+  exit 0
+fi
+
+cat << EOF
+# Implementation Plan
+
+You are tasked with creating detailed implementation plans through an interactive, iterative process. You should be skeptical, thorough, and work collaboratively with the user to produce high-quality technical specifications.
+
+**Plan Topic/Source:** $TOPIC
+
+## Initial Steps
+
+1. **Read any provided files FULLY**:
+   - If a file path was provided, read it completely using Read tool WITHOUT limit/offset parameters
+   - Read these files yourself in the main context before spawning any sub-tasks
+   - **NEVER** read files partially
+
+2. **Load existing workflow documents for current branch**:
+   - Run: \`git branch --show-current\` to get the current branch name
+   - Use the **workflow-locator** agent to find any existing workflow documents related to this branch
+   - Read and incorporate relevant context before proceeding
+
+## Process Steps
+
+### Step 1: Context Gathering & Initial Analysis
+
+1. **Spawn initial research tasks to gather context**:
+   Before asking the user any questions, use specialized agents to research in parallel:
+
+   - Use the **codebase-locator** agent to find all files related to the ticket/task
+   - Use the **codebase-analyzer** agent to understand how the current implementation works
+   - Use the **workflow-locator** agent to find any existing workflow documents about this feature
+
+2. **Read all files identified by research tasks**:
+   - After research tasks complete, read ALL files they identified as relevant
+   - Read them FULLY into the main context
+
+3. **Analyze and verify understanding**:
+   - Cross-reference the ticket requirements with actual code
+   - Identify any discrepancies or misunderstandings
+   - Note assumptions that need verification
+   - Determine true scope based on codebase reality
+
+4. **Present informed understanding and focused questions**:
+   \`\`\`
+   Based on the ticket and my research of the codebase, I understand we need to [accurate summary].
+
+   I've found that:
+   - [Current implementation detail with file:line reference]
+   - [Relevant pattern or constraint discovered]
+   - [Potential complexity or edge case identified]
+
+   Questions that my research couldn't answer:
+   - [Specific technical question that requires human judgment]
+   - [Business logic clarification]
+   - [Design preference that affects implementation]
+   \`\`\`
+
+   Only ask questions that you genuinely cannot answer through code investigation.
+
+### Step 2: Research & Discovery
+
+After getting initial clarifications:
+
+1. **If the user corrects any misunderstanding**:
+   - DO NOT just accept the correction
+   - Spawn new research tasks to verify the correct information
+   - Read the specific files/directories they mention
+   - Only proceed once you've verified the facts yourself
+
+2. **Create a research todo list** using TodoWrite to track exploration tasks
+
+3. **Spawn parallel sub-tasks for comprehensive research**:
+   - **codebase-locator** - To find more specific files
+   - **codebase-analyzer** - To understand implementation details
+   - **codebase-pattern-finder** - To find similar features we can model after
+   - **workflow-locator** - To find any research, plans, or decisions about this area
+   - **workflow-analyzer** - To extract key insights from the most relevant documents
+
+4. **Wait for ALL sub-tasks to complete** before proceeding
+
+5. **Present findings and design options**:
+   \`\`\`
+   Based on my research, here's what I found:
+
+   **Current State:**
+   - [Key discovery about existing code]
+   - [Pattern or convention to follow]
+
+   **Design Options:**
+   1. [Option A] - [pros/cons]
+   2. [Option B] - [pros/cons]
+
+   **Open Questions:**
+   - [Technical uncertainty]
+   - [Design decision needed]
+
+   Which approach aligns best with your vision?
+   \`\`\`
+
+### Step 3: Plan Structure Development
+
+Once aligned on approach:
+
+1. **Create initial plan outline**:
+   \`\`\`
+   Here's my proposed plan structure:
+
+   ## Overview
+   [1-2 sentence summary]
+
+   ## Implementation Phases:
+   1. [Phase name] - [what it accomplishes]
+   2. [Phase name] - [what it accomplishes]
+   3. [Phase name] - [what it accomplishes]
+
+   Does this phasing make sense? Should I adjust the order or granularity?
+   \`\`\`
+
+2. **Get feedback on structure** before writing details
+
+### Step 4: Detailed Plan Writing
+
+After structure approval:
+
+1. **Gather metadata** by calling the \`spec_metadata\` tool
+
+2. **Write the plan** to \`workflow/plans/YYYY-MM-DD-ENG-XXXX-description.md\`
+   - Format: \`YYYY-MM-DD-ENG-XXXX-description.md\` where:
+     - YYYY-MM-DD is today's date
+     - ENG-XXXX is the ticket number (omit if no ticket)
+     - description is a brief kebab-case description
+
+3. **Use proper template structure** with YAML frontmatter including:
+   - date, git_commit, branch, repository, topic, ticket, tags, status
+   - Sections: Overview, Current State Analysis, Desired End State, What We're NOT Doing
+   - Implementation Phases with Changes Required and Success Criteria
+   - Both Automated Verification and Manual Verification criteria
+   - Testing Strategy, Performance Considerations, Migration Notes, References
+
+### Step 5: Review and Iterate
+
+1. **Present the draft plan location**
+2. **Iterate based on feedback**
+3. **Continue refining** until the user is satisfied
+4. **Update frontmatter status** to \`approved\` when plan is finalized
+
+## Important Guidelines
+
+1. **Be Skeptical**: Question vague requirements, identify potential issues early
+2. **Be Interactive**: Don't write the full plan in one shot, get buy-in at each step
+3. **Be Thorough**: Read all context files COMPLETELY, research actual code patterns
+4. **Be Practical**: Focus on incremental, testable changes
+5. **Track Progress**: Use TodoWrite to track planning tasks
+6. **No Open Questions in Final Plan**: Research or ask for clarification immediately
+
+## Success Criteria Guidelines
+
+**Always separate success criteria into two categories:**
+
+1. **Automated Verification** (can be run by execution agents):
+   - Commands that can be run: \`bundle exec rspec\`, \`bin/rubocop\`, etc.
+   - Specific files that should exist
+   - Code compilation/type checking
+
+2. **Manual Verification** (requires human testing):
+   - UI/UX functionality
+   - Performance under real conditions
+   - Edge cases that are hard to automate
+
+Now begin planning for: $TOPIC
+EOF
