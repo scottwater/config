@@ -79,3 +79,5 @@
 	machineId = cli/a35d2acf9d9545609d33825ab4861226
 [advice]
 	skippedCherryPicks = false
+[init]
+	defaultBranch = main

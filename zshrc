@@ -62,6 +62,13 @@ function find_routes() {
   bin/rails routes -g "$1"
 }
 
+  gemini_key() {
+    if [[ -z "$GEMINI_API_KEY" ]]; then
+      export GEMINI_API_KEY=$(op read "op://Dev/Gemini API Key/credential" --account watermasysk.1password.com)
+    fi
+    echo "$GEMINI_API_KEY"
+  }
+
 alias hp="nocorrect hp"
 alias hs="nocorrect hs"
 alias mwt='eval "$(bin/wt --select)"'
