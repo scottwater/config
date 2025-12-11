@@ -1,14 +1,48 @@
----
-description: Implement technical plans from workflow/plans with verification [path to plan file]
----
+#!/bin/bash
+# implement_plan - Implement technical plans from workflow/plans with verification
 
+PLAN_PATH="$*"
+
+if [ -z "$PLAN_PATH" ]; then
+  cat << 'EOF'
+I'm ready to implement a technical plan. Please provide the path to the plan file.
+
+Example: `/implement_plan workflow/plans/2025-01-08-ENG-1478-parent-child-tracking.md`
+
+You can find available plans with: `ls workflow/plans/`
+EOF
+  exit 0
+fi
+
+cat << EOF
 # Implement Plan
 
-You are tasked with implementing an approved technical plan from `workflow/plans/`. These plans contain phases with specific changes and success criteria.
+**Plan file:** $PLAN_PATH
 
-**Plan to implement:** $ARGUMENTS
+## Before Starting
 
-## Getting Started
+**IMPORTANT: Get confirmation before proceeding.**
+
+1. First, read the plan file completely to understand what will be implemented
+2. Present a summary to the user:
+   \`\`\`
+   Ready to implement: [Plan Title]
+
+   This plan involves:
+   - Phase 1: [Brief description]
+   - Phase 2: [Brief description]
+   - ...
+
+   Key changes:
+   - [Major change 1]
+   - [Major change 2]
+
+   Shall I proceed with implementation?
+   \`\`\`
+
+3. **Wait for explicit confirmation** before making any changes
+
+## Getting Started (after confirmation)
 
 When given a plan path:
 - Read the plan completely and check for any existing checkmarks (- [x])
@@ -17,15 +51,6 @@ When given a plan path:
 - Think deeply about how the pieces fit together
 - Create a todo list to track your progress
 - Start implementing if you understand what needs to be done
-
-If no plan path provided, ask for one:
-```
-I'm ready to implement a technical plan. Please provide the path to the plan file.
-
-Example: `/implement_plan workflow/plans/2025-01-08-ENG-1478-parent-child-tracking.md`
-
-You can find available plans with: `ls workflow/plans/`
-```
 
 ## Implementation Philosophy
 
@@ -40,24 +65,24 @@ When things don't match the plan exactly, think about why and communicate clearl
 If you encounter a mismatch:
 - STOP and think deeply about why the plan can't be followed
 - Present the issue clearly:
-  ```
+  \`\`\`
   Issue in Phase [N]:
   Expected: [what the plan says]
   Found: [actual situation]
   Why this matters: [explanation]
 
   How should I proceed?
-  ```
+  \`\`\`
 
 ## Verification Approach
 
 After implementing a phase:
-- Run the success criteria checks (usually `bundle exec rspec` and `bin/rubocop` cover the basics)
+- Run the success criteria checks (usually \`bundle exec rspec\` and \`bin/rubocop\` cover the basics)
 - Fix any issues before proceeding
 - Update your progress in both the plan and your todos
 - Check off completed items in the plan file itself using Edit
-- **Pause for human verification**: After completing all automated verification for a phase, pause and inform the human that the phase is ready for manual testing. Use this format:
-  ```
+- **Pause for human verification**: After completing all automated verification for a phase, pause and inform the human that the phase is ready for manual testing:
+  \`\`\`
   Phase [N] Complete - Ready for Manual Verification
 
   Automated verification passed:
@@ -67,7 +92,7 @@ After implementing a phase:
   - [List manual verification items from the plan]
 
   Let me know when manual testing is complete so I can proceed to Phase [N+1].
-  ```
+  \`\`\`
 
 If instructed to execute multiple phases consecutively, skip the pause until the last phase. Otherwise, assume you are just doing one phase.
 
@@ -99,13 +124,17 @@ As you complete work:
 3. Summarize what was done after each phase
 
 Example progress update:
-```
+\`\`\`
 Completed Phase 1:
 - [x] Created migration for new table
 - [x] Added model with validations
 - [x] Wrote unit tests (all passing)
 
 Ready for Phase 2 or awaiting manual verification.
-```
+\`\`\`
 
 Remember: You're implementing a solution, not just checking boxes. Keep the end goal in mind and maintain forward momentum.
+
+Now read and summarize the plan at: $PLAN_PATH
+Then ask for confirmation before implementing.
+EOF

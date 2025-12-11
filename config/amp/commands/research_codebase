@@ -1,7 +1,9 @@
----
-description: Research codebase comprehensively using parallel sub-agents
----
+#!/bin/bash
+# research_codebase - Research codebase comprehensively using parallel sub-agents
 
+TOPIC="$*"
+
+cat << 'PROMPT'
 # Research Codebase
 
 You are tasked with conducting comprehensive research across the codebase to answer user questions by spawning parallel sub-agents and synthesizing their findings.
@@ -17,30 +19,21 @@ You are tasked with conducting comprehensive research across the codebase to ans
 - ONLY describe what exists, where it exists, how it works, and how components interact
 - You are creating a technical map/documentation of the existing system
 
-## Initial Setup
-
-When this command is invoked, respond with:
-```
-I'm ready to research the codebase. Please provide your research question or area of interest, and I'll analyze it thoroughly by exploring relevant components and connections.
-```
-
-Then wait for the user's research query.
-
-## Steps to follow after receiving the research query:
+## Steps to follow:
 
 ### 1. Read any directly mentioned files first
 
 **CRITICAL ORDERING - DO THIS BEFORE SPAWNING SUB-TASKS:**
 
-If the user mentions specific files (tickets, docs, JSON):
+If files are mentioned in the topic:
 - Read them FULLY first using Read tool WITHOUT limit/offset parameters
 - Read these files yourself in the main context before spawning any sub-tasks
 - This ensures you have full context before decomposing the research
 
 ### 2. Analyze and decompose the research question
 
-- Break down the user's query into composable research areas
-- Take time to ultrathink about the underlying patterns, connections, and architectural implications the user might be seeking
+- Break down the query into composable research areas
+- Take time to ultrathink about the underlying patterns, connections, and architectural implications
 - Identify specific components, patterns, or concepts to investigate
 - Create a research plan using TodoWrite to track all subtasks
 - Consider which directories, files, or architectural patterns are relevant
@@ -60,7 +53,7 @@ Create multiple Task agents to research different aspects concurrently.
 - `workflow-locator`: Discover what documents exist about the topic
 - `workflow-analyzer`: Extract key insights from specific documents (most relevant ones only)
 
-**For web research (only if user explicitly asks):**
+**For web research (only if explicitly asked):**
 - `web-search-researcher`: External documentation and resources
 - IF used, instruct agents to return LINKS and INCLUDE those links in final report
 
@@ -69,7 +62,6 @@ Create multiple Task agents to research different aspects concurrently.
 - Then use analyzer agents on the most promising findings
 - Run multiple agents in parallel when searching for different things
 - Each agent knows its job - just tell it what you're looking for
-- Don't write detailed prompts about HOW to search - agents already know
 - Remind agents they are documenting, not evaluating or improving
 
 ### 4. Wait for all sub-agents to complete and synthesize findings
@@ -102,14 +94,6 @@ This generates:
 **Document filename format:**
 - With ticket: `workflow/research/YYYY-MM-DD-ENG-XXXX-description.md`
 - Without ticket: `workflow/research/YYYY-MM-DD-description.md`
-- Where:
-  - YYYY-MM-DD is today's date
-  - ENG-XXXX is the ticket number (omit if no ticket)
-  - description is brief kebab-case description
-
-**Examples:**
-- `workflow/research/2025-01-08-ENG-1478-parent-child-tracking.md`
-- `workflow/research/2025-01-08-authentication-flow.md`
 
 ### 6. Generate research document
 
@@ -137,9 +121,6 @@ last_updated_by: [Researcher name]
 **Branch**: [Current branch name from metadata]
 **Repository**: [Repository name]
 
-## Research Question
-[Original user query]
-
 ## Summary
 [High-level documentation of what was found, answering the user's question by describing what exists]
 
@@ -162,8 +143,6 @@ last_updated_by: [Researcher name]
 
 ## Historical Context (from workflow/)
 [Relevant insights from workflow/ directory with references]
-- `workflow/something.md` - Historical decision about X
-- `workflow/notes.md` - Past exploration of Y
 
 ## Related Research
 [Links to other research documents in workflow/research/]
@@ -181,15 +160,10 @@ git branch --show-current && git status
 ```
 
 If on main/master or pushed:
-
 ```bash
-# Get repo info
 gh repo view --json owner,name
-
 # Create permalinks: https://github.com/{owner}/{repo}/blob/{commit}/{file}#L{line}
 ```
-
-Replace local file references with permalinks in the document.
 
 ### 8. Sync and present findings
 
@@ -202,17 +176,15 @@ Replace local file references with permalinks in the document.
 If the user has follow-up questions:
 - Append to the same research document
 - Update frontmatter fields `last_updated` and `last_updated_by`
-- Add `last_updated_note: "Added follow-up research for [brief description]"` to frontmatter
 - Add a new section: `## Follow-up Research [timestamp]`
 - Spawn new sub-agents as needed for additional investigation
-- Continue updating the document and syncing
 
 ## Important Notes
 
 **Ordering:**
-1. ALWAYS read mentioned files FULLY before spawning sub-tasks (step 1)
-2. ALWAYS wait for all sub-agents to complete before synthesizing (step 4)
-3. ALWAYS gather metadata before writing document (step 5 before step 6)
+1. ALWAYS read mentioned files FULLY before spawning sub-tasks
+2. ALWAYS wait for all sub-agents to complete before synthesizing
+3. ALWAYS gather metadata before writing document
 4. NEVER write research document with placeholder values
 
 **Mindset:**
@@ -222,7 +194,7 @@ If the user has follow-up questions:
 - Focus on objective technical documentation
 
 **Efficiency:**
-- Always use parallel Task agents to maximize efficiency and minimize context usage
+- Always use parallel Task agents to maximize efficiency
 - Always run fresh codebase research - never rely solely on existing research documents
 - The workflow/ directory provides historical context to supplement live findings
 - Focus on finding concrete file paths and line numbers for developer reference
@@ -233,28 +205,20 @@ If the user has follow-up questions:
 - Consider cross-component connections and architectural patterns
 - Include temporal context (when the research was conducted)
 - Link to GitHub when possible for permanent references
-- Keep the main agent focused on synthesis, not deep file reading
-- Encourage sub-agents to find examples and usage patterns, not just definitions
-- Explore all of workflow/ directory, not just research subdirectory
 
-**Frontmatter consistency:**
-- Always include frontmatter at the beginning of research documents
-- Keep frontmatter fields consistent across all research documents
-- Update frontmatter when adding follow-up research
-- Use snake_case for multi-word field names (e.g., `last_updated`, `git_commit`)
-- Tags should be relevant to the research topic and components studied
+PROMPT
 
-## Validation Checklist
-
-Before finalizing research:
-
-- [ ] All mentioned files read fully in main context
-- [ ] All sub-agents completed and results synthesized
-- [ ] Metadata gathered using `spec_metadata` tool
-- [ ] YAML frontmatter complete and correct
-- [ ] Document filename follows naming convention
-- [ ] workflow/ paths are correct and follow directory structure
-- [ ] Code references include file paths and line numbers
-- [ ] Only documents what exists, no suggestions or critiques
-- [ ] GitHub permalinks added (if applicable)
-- [ ] Summary presented to user
+if [ -z "$TOPIC" ]; then
+  echo "Please provide your research question or area of interest, and I'll begin the research process."
+  echo "---"
+  echo ""
+  echo "QUESTION: "
+else
+  echo ""
+  echo "---"
+  echo ""
+  echo "## Research Topic:"
+  echo "$TOPIC"
+  echo ""
+  echo "Click enter to begin the research process."
+fi

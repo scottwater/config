@@ -101,7 +101,7 @@ if File.exist?(opencode_source_dir)
   puts "\n"
 end
 
-# Amp config files - copy command files (symlinks not supported yet)
+# Amp config files - symlink command files
 amp_config_dir = File.join(config_path, "amp")
 amp_commands_dir = File.join(amp_config_dir, "commands")
 amp_source_dir = File.join(script_dir, "config", "amp")
@@ -116,14 +116,13 @@ if File.exist?(amp_commands_source_dir)
     FileUtils.mkdir_p(amp_commands_dir)
   end
 
-  # Copy each file in the amp commands directory (Amp doesn't follow symlinks)
+  # Symlink each file in the amp commands directory
   Dir.glob(File.join(amp_commands_source_dir, "*")).each do |source_file|
     next if File.directory?(source_file)
 
     filename = File.basename(source_file)
     target = File.join(amp_commands_dir, filename)
-    puts "Copying #{filename} to #{amp_commands_dir}"
-    FileUtils.cp(source_file, target)
+    link_if_needed(target, source_file)
   end
   puts "\n"
 end
