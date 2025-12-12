@@ -71,7 +71,7 @@
   "theme_overrides": {
     "Tokyo Night Light": {
       "terminal.background": "#16161e",
-      "terminal.foreground": null,
+      "terminal.foreground": "#a9b1d6",
       "terminal.ansi.background": "#16161e",
       "terminal.bright_foreground": null,
       "terminal.dim_foreground": null,
@@ -101,33 +101,24 @@
       "terminal.ansi.dim_white": null
     },
     "Tokyo Night": {
-      "terminal.foreground": null,
-      "terminal.bright_foreground": null,
-      "terminal.dim_foreground": null,
+      "terminal.background": "#cbccd1",
+      "terminal.foreground": "#343b58",
       "terminal.ansi.black": "#0f0f14",
       "terminal.ansi.bright_black": "#0f0f14",
-      "terminal.ansi.dim_black": null,
       "terminal.ansi.red": "#8c4351",
       "terminal.ansi.bright_red": "#8c4351",
-      "terminal.ansi.dim_red": null,
       "terminal.ansi.green": "#33635c",
       "terminal.ansi.bright_green": "#33635c",
-      "terminal.ansi.dim_green": null,
       "terminal.ansi.yellow": "#8f5e15",
       "terminal.ansi.bright_yellow": "#8f5e15",
-      "terminal.ansi.dim_yellow": null,
       "terminal.ansi.blue": "#34548a",
       "terminal.ansi.bright_blue": "#34548a",
-      "terminal.ansi.dim_blue": null,
       "terminal.ansi.magenta": "#5a4a78",
       "terminal.ansi.bright_magenta": "#5a4a78",
-      "terminal.ansi.dim_magenta": null,
       "terminal.ansi.cyan": "#0f4b6e",
       "terminal.ansi.bright_cyan": "#0f4b6e",
-      "terminal.ansi.dim_cyan": null,
       "terminal.ansi.white": "#828594",
-      "terminal.ansi.bright_white": "#828594",
-      "terminal.ansi.dim_white": null
+      "terminal.ansi.bright_white": "#828594"
     }
   },
   "file_scan_exclusions": [".worktrees/", "*.log", ".conductor/"]
