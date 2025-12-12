@@ -76,6 +76,24 @@ if File.exist?(zed_source_dir)
     target = File.join(zed_config_dir, filename)
     link_if_needed(target, source_file)
   end
+
+  # Symlink theme files in zed/themes subdirectory
+  zed_themes_source_dir = File.join(zed_source_dir, "themes")
+  if File.exist?(zed_themes_source_dir)
+    zed_themes_target_dir = File.join(zed_config_dir, "themes")
+    unless Dir.exist?(zed_themes_target_dir)
+      puts "Creating #{zed_themes_target_dir} directory"
+      FileUtils.mkdir_p(zed_themes_target_dir)
+    end
+
+    Dir.glob(File.join(zed_themes_source_dir, "*")).each do |source_file|
+      next if File.directory?(source_file)
+
+      filename = File.basename(source_file)
+      target = File.join(zed_themes_target_dir, filename)
+      link_if_needed(target, source_file)
+    end
+  end
   puts "\n"
 end
 

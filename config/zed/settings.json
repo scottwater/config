@@ -51,11 +51,7 @@
   "ui_font_family": "Hack Nerd Font Mono",
   "buffer_font_family": "Hack Nerd Font Mono",
   "buffer_font_size": 20,
-  "theme": {
-    "mode": "system",
-    "light": "Tokyo Night Light",
-    "dark": "Tokyo Night"
-  },
+  "theme": "Dracula Pro (Van Helsing)",
   "languages": {
     "Ruby": {
       "language_servers": ["ruby-lsp"]
@@ -69,6 +65,36 @@
     }
   },
   "theme_overrides": {
+    "Dracula Pro (Van Helsing)": {
+      "terminal.background": "#15141bff",
+      "terminal.foreground": "#f8f8f2ff",
+      "terminal.bright_foreground": "#f9f9f5ff",
+      "terminal.dim_foreground": "#c6c6c2ff",
+      "terminal.ansi.black": "#21222cff",
+      "terminal.ansi.bright_black": "#a19bc3ff",
+      "terminal.ansi.dim_black": "#1a1b23ff",
+      "terminal.ansi.red": "#ff9580ff",
+      "terminal.ansi.bright_red": "ffbfb3ff",
+      "terminal.ansi.dim_red": "#cc7766ff",
+      "terminal.ansi.green": "#8aff80ff",
+      "terminal.ansi.bright_green": "#b9ffb3ff",
+      "terminal.ansi.dim_green": "#6ecc66ff",
+      "terminal.ansi.yellow": "#ffff80ff",
+      "terminal.ansi.bright_yellow": "#ffffb3ff",
+      "terminal.ansi.dim_yellow": "#cccc66ff",
+      "terminal.ansi.blue": "#9580ffff",
+      "terminal.ansi.bright_blue": "#bfb3ffff",
+      "terminal.ansi.dim_blue": "#7766ccff",
+      "terminal.ansi.magenta": "#ff80bfff",
+      "terminal.ansi.bright_magenta": "#ffb3d9ff",
+      "terminal.ansi.dim_magenta": "#cc6699ff",
+      "terminal.ansi.cyan": "#80ffeaff",
+      "terminal.ansi.bright_cyan": "#b3fff2ff",
+      "terminal.ansi.dim_cyan": "#66ccbbff",
+      "terminal.ansi.white": "#f8f8f2ff",
+      "terminal.ansi.bright_white": "ffffffff",
+      "terminal.ansi.dim_white": "#c6c6c2ff"
+    },
     "Tokyo Night Light": {
       "terminal.background": "#16161e",
       "terminal.foreground": "#a9b1d6",
