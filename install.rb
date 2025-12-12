@@ -125,22 +125,41 @@ amp_commands_dir = File.join(amp_config_dir, "commands")
 amp_source_dir = File.join(script_dir, "config", "amp")
 amp_commands_source_dir = File.join(amp_source_dir, "commands")
 
-if File.exist?(amp_commands_source_dir)
+if File.exist?(amp_source_dir)
   puts "Installing Amp config files"
 
-  # Ensure ~/.config/amp/commands directory exists
-  unless Dir.exist?(amp_commands_dir)
-    puts "Creating #{amp_commands_dir} directory"
-    FileUtils.mkdir_p(amp_commands_dir)
+  # Ensure ~/.config/amp directory exists
+  unless Dir.exist?(amp_config_dir)
+    puts "Creating #{amp_config_dir} directory"
+    FileUtils.mkdir_p(amp_config_dir)
+  end
+
+  # Copy settings.json if it exists (not symlinked since Amp modifies it)
+  amp_settings_source = File.join(amp_source_dir, "settings.json")
+  if File.exist?(amp_settings_source)
+    amp_settings_target = File.join(amp_config_dir, "settings.json")
+    unless File.exist?(amp_settings_target)
+      puts "Copying #{amp_settings_source} to #{amp_settings_target}"
+      FileUtils.cp(amp_settings_source, amp_settings_target)
+    else
+      puts "#{amp_settings_target} already exists, skipping"
+    end
   end
 
   # Symlink each file in the amp commands directory
-  Dir.glob(File.join(amp_commands_source_dir, "*")).each do |source_file|
-    next if File.directory?(source_file)
+  if File.exist?(amp_commands_source_dir)
+    unless Dir.exist?(amp_commands_dir)
+      puts "Creating #{amp_commands_dir} directory"
+      FileUtils.mkdir_p(amp_commands_dir)
+    end
 
-    filename = File.basename(source_file)
-    target = File.join(amp_commands_dir, filename)
-    link_if_needed(target, source_file)
+    Dir.glob(File.join(amp_commands_source_dir, "*")).each do |source_file|
+      next if File.directory?(source_file)
+
+      filename = File.basename(source_file)
+      target = File.join(amp_commands_dir, filename)
+      link_if_needed(target, source_file)
+    end
   end
   puts "\n"
 end

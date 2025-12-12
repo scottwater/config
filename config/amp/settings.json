@@ -1,0 +1,8 @@
+{
+  "amp.mcpServers": {
+    "kapture": {
+      "command": "npx",
+      "args": ["-y", "kapture-mcp", "bridge"]
+    }
+  }
+}
