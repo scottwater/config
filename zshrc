@@ -94,3 +94,8 @@ export RAILS_EDITOR="zed"
 
 # AMP toolbox directory (resolves symlink to find actual location)
 export AMP_TOOLBOX="${${(%):-%x}:A:h}/config/amp/tools"
+
+# Claude Code setup (sources Python venv and loads GEMINI_API_KEY)
+function claude_setup() {
+  source "${${(%):-%x}:A:h}/zsh/claude_setup"
+}

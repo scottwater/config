@@ -1,0 +1,41 @@
+#!/bin/bash
+# Claude Code environment setup
+# Usage: source claude_setup  (must be sourced, not executed)
+#
+# Sets up:
+# - Python virtual environment for gemini-imagegen skill
+# - GEMINI_API_KEY from 1Password
+
+# Check if script is being sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "Error: This script must be sourced, not executed."
+    echo "Usage: source claude_setup"
+    exit 1
+fi
+
+# Activate Python virtual environment (uses symlinked skills location)
+VENV_PATH="$HOME/.claude/skills/gemini-imagegen/venv"
+if [[ -d "$VENV_PATH" ]]; then
+    source "$VENV_PATH/bin/activate"
+    echo "Activated Python venv: $VENV_PATH"
+else
+    echo "Warning: Python venv not found at $VENV_PATH"
+    echo "Run: python3 -m venv $VENV_PATH && $VENV_PATH/bin/pip install google-genai pillow"
+fi
+
+# Set GEMINI_API_KEY from 1Password
+if [[ -z "$GEMINI_API_KEY" ]]; then
+    if command -v op &> /dev/null; then
+        export GEMINI_API_KEY=$(op read "op://Dev/Gemini API Key/credential" --account watermasysk.1password.com 2>/dev/null)
+        if [[ -n "$GEMINI_API_KEY" ]]; then
+            echo "GEMINI_API_KEY loaded from 1Password"
+        else
+            echo "Warning: Failed to load GEMINI_API_KEY from 1Password"
+            echo "You may need to run: op signin watermasysk.1password.com"
+        fi
+    else
+        echo "Warning: 1Password CLI (op) not found. GEMINI_API_KEY not set."
+    fi
+else
+    echo "GEMINI_API_KEY already set"
+fi
