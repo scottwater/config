@@ -10,7 +10,7 @@ You are tasked with creating git commits that follow story-driven commit guideli
 
 Before planning commits:
 1. Review the conversation history to understand what was accomplished during this session
-2. Check the current branch name and look for related context in `/thoughts` directory that might inform commit decisions
+2. Check the current branch name and look for related context in `/thoughts` and `/workflow` directories that might inform commit decisions
 3. Use this context to write commits that accurately reflect the work's purpose and decisions
 
 ## Process
