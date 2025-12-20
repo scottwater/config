@@ -179,4 +179,4 @@ end
 # reload shell before continuing (brew command will not exist without)
 system! "exec zsh -l"
 
-system! "brew bundle --no-upgrade"
+system! "brew bundle --no-upgrade" if ENV["BREW"]
