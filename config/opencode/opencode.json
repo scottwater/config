@@ -1,6 +1,8 @@
 {
   "plugin": [
-    "opencode-skills"
+    "opencode-skills",
+    "opencode-openai-codex-auth@4.2.0",
+    "opencode-gemini-auth@latest"
   ],
   "$schema": "https://opencode.ai/config.json"
 }
